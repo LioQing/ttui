@@ -38,7 +38,6 @@ namespace ttui
             {
                 tcon::SetCursorPos(rect.x + x, rect.y + y);
 
-                next_x = 0;
                 Appearance appear;
                 appear.is_none = true;
                 auto line = widget.GetString(y, next_x, appear);
@@ -61,5 +60,7 @@ namespace ttui
                 }
             }
         }
+
+        fflush(stdout);
     }
 }
