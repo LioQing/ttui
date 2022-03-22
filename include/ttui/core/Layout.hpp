@@ -5,9 +5,9 @@
 #include <algorithm>
 #include <memory>
 
-#include <ttui/Direction.hpp>
-#include <ttui/Widget.hpp>
-#include <ttui/Definition.hpp>
+#include <ttui/core/Direction.hpp>
+#include <ttui/core/Widget.hpp>
+#include <ttui/core/Definition.hpp>
 
 namespace ttui
 {

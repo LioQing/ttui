@@ -1,4 +1,4 @@
-#include <ttui/Rect.hpp>
+#include <ttui/core/Rect.hpp>
 
 namespace ttui
 {

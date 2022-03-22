@@ -1,9 +1,10 @@
-#include <ttui/Handle.hpp>
+#include <ttui/core/Handle.hpp>
 
 #include <cstdint>
-#include <ttui/Widget.hpp>
-#include <ttui/Rect.hpp>
-#include <ttui/Appearance.hpp>
+#include <ttui/core/Widget.hpp>
+#include <ttui/core/Rect.hpp>
+#include <ttui/core/Appearance.hpp>
+#include <ttui/core/Span.hpp>
 
 namespace
 {
@@ -40,6 +41,9 @@ namespace ttui
         auto rect = widget.GetRect();
         auto border = widget.GetBorder();
 
+        uint16_t offset = !border.is_none;
+        uint16_t widget_width = rect.width - offset * 2;
+
         for (uint16_t y = 0; y < rect.height; ++y)
         {
             // draw border
@@ -58,7 +62,7 @@ namespace ttui
                     right = &border.slices.at(Border::TopRight);
 
                     mid_slice = Border::Top;
-                    for (uint16_t i = 0; i < rect.width - 2; ++i)
+                    for (uint16_t i = 0; i < widget_width; ++i)
                         mid_str += border.slices.at(mid_slice).str;
                 }
                 else if (y == rect.height - 1)
@@ -67,11 +71,9 @@ namespace ttui
                     right = &border.slices.at(Border::BottomRight);
 
                     mid_slice = Border::Bottom;
-                    for (uint16_t i = 0; i < rect.width - 2; ++i)
+                    for (uint16_t i = 0; i < widget_width; ++i)
                         mid_str += border.slices.at(mid_slice).str;
                 }
-
-                auto temp = ProcessAppearance(right->appear);
 
                 buf +=
                     tcon::SetCursorPos(rect.x, rect.y + y) +
@@ -81,10 +83,9 @@ namespace ttui
                 if (!mid_str.empty())
                 {
                     buf +=
-                        ProcessAppearance(border.slices.at(Border::Bottom).appear) +
+                        ProcessAppearance(border.slices.at(mid_slice).appear) +
                         mid_str + 
-                        tcon::SetCursorPos(rect.x + rect.width, rect.y + y) +
-                        temp +
+                        ProcessAppearance(right->appear) +
                         right->str;
 
                     continue;
@@ -92,41 +93,38 @@ namespace ttui
                 else
                 {
                     right_border_str = 
-                        tcon::SetCursorPos(rect.x + rect.width, rect.y + y) +
-                        temp +
+                        ProcessAppearance(right->appear) +
                         right->str;
                 }
             }
+            else
+            {
+                buf += tcon::SetCursorPos(rect.x, rect.y + y);
+            }
 
             // draw string
-            uint16_t offset = 0;
-            if (!border.is_none)
-                offset = 1;
-            uint16_t widget_width = rect.width - offset * 2;
-
             for (uint16_t x = 0, next_x = 0; x < widget_width; x = next_x)
             {
-                Appearance appear;
-                auto str = widget.GetString(y - offset, next_x, appear);
+                Span span = widget.GetSpan(y - offset, next_x);
                 std::string padding;
 
-                if (x + str.size() > widget_width)
+                if (x + span.str.size() > widget_width)
                 {
-                    str.resize(widget_width - x);
+                    span.str.resize(widget_width - x);
                 }
-                else if (str.size() < (size_t)next_x - x)
+                else if (span.str.size() < (size_t)next_x - x)
                 {
-                    padding.resize(next_x - x - str.size(), ' ');
+                    padding.resize(next_x - x - span.str.size(), ' ');
                 }
                 else if (next_x == x)
                 {
-                    padding.resize(widget_width - x - str.size(), ' ');
+                    padding.resize(widget_width - x - span.str.size(), ' ');
                     next_x = widget_width;
                 }
 
                 buf +=
-                    ProcessAppearance(appear) +
-                    str + 
+                    ProcessAppearance(span.appear) +
+                    span.str + 
                     tcon::SetAppearance({ tcon::ColorReset(tcon::Target::Background) }) +
                     padding;
             }

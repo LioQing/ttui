@@ -1,4 +1,4 @@
-#include <ttui/Color.hpp>
+#include <ttui/core/Color.hpp>
 
 namespace ttui
 {

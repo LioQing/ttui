@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <ttui/tcon.hpp>
+#include <ttui/core/tcon.hpp>
 
 namespace ttui
 {

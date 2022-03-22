@@ -1,4 +1,4 @@
-#include <ttui/Border.hpp>
+#include <ttui/core/Border.hpp>
 
 namespace ttui
 {

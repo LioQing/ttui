@@ -1,4 +1,4 @@
-#include <ttui/Definition.hpp>
+#include <ttui/core/Definition.hpp>
 
 namespace ttui
 {

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <ttui/Color.hpp>
+#include <ttui/core/Color.hpp>
+#include <ttui/core/Style.hpp>
 
 namespace ttui
 {
@@ -25,7 +26,7 @@ namespace ttui
          * @param bg_color The background color
          * @param style The style
          */
-        Appearance(const Color& fg_color, const Color& bg_color, uint8_t style);
+        Appearance(const Color& fg_color, const Color& bg_color = Color::Reset(), uint8_t style = Style::None);
 
         /**
          * @brief Construct a special Appearance object which preserve the previous appearance used, all other fields are ignored.
@@ -36,7 +37,7 @@ namespace ttui
 
         Color fg_color = Color::Reset();
         Color bg_color = Color::Reset();
-        uint8_t style = 0;
+        uint8_t style = Style::None;
 
         bool unchanged = false;
 

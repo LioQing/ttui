@@ -1,4 +1,4 @@
-#include <ttui/tcon.hpp>
+#include <ttui/core/tcon.hpp>
 
 #include <cstdio>
 #include <cstdlib>

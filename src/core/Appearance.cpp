@@ -1,4 +1,4 @@
-#include <ttui/Appearance.hpp>
+#include <ttui/core/Appearance.hpp>
 
 namespace ttui
 {

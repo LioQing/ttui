@@ -3,26 +3,26 @@
 #include <string>
 #include <cstdint>
 
-#include <ttui/Border.hpp>
+#include <ttui/core/Border.hpp>
 
 namespace ttui
 {
     struct Rect;
     struct Appearance;
+    struct Span;
 
     struct Widget
     {
         virtual ~Widget() {}
 
         /**
-         * @brief Get the string to be printed.
+         * @brief Get the span to be printed.
          * 
-         * @param y The local y coordinate
-         * @param next_x Next string's local x coordinate (if unchanged or exceed width of widget, y will be incremented to a new line)
-         * @param appear The appearance of the string (if unchanged, previous appearance will be preserved)
-         * @return std::string The string to be printed
+         * @param y The local y coordinate, always start at 0
+         * @param next_x Passed in as current x coordinate, always start at 0, expect to get next x coordinate (if unchanged, next call will be new line, y incremented)
+         * @return Span The span
          */
-        virtual std::string GetString(uint16_t y, uint16_t& next_x, Appearance& appear) const = 0;
+        virtual Span GetSpan(uint16_t y, uint16_t& next_x) const = 0;
 
         /**
          * @brief Get the rectangle of the widget.
