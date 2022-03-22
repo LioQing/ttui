@@ -8,30 +8,38 @@
 
 struct MyWidget : ttui::Widget
 {
+    const ttui::Handle& handle;
+
+    MyWidget(const ttui::Handle& handle) : handle(handle) {}
+
     std::string GetString(uint16_t y, uint16_t& next_x, ttui::Appearance& appear) const override
     {
         if      (y == 0 && next_x == 0) { next_x = 1; return ""; }
-        else if (y == 0 && next_x == 1) { return " MyWidget "; }
-        else if (y == 2 && next_x == 0) { next_x = 2; return ""; }
-        else if (y == 2 && next_x == 2) { return "Hello World!"; }
-        else return "";
+        else if (y == 0 && next_x == 1) { appear.fg_color = ttui::Color::Green(); appear.style = ttui::Style::Italic | ttui::Style::Blink; return std::to_string(handle.GetHeight()); }
+        else if (y < handle.GetHeight() - 3 && y > 0 && next_x == 0) { next_x = handle.GetWidth() / 2 - 7; return ""; }
+        else if (y < handle.GetHeight() - 3 && y > 0 && next_x == handle.GetWidth() / 2 - 7) { return "Hello World!"; }
+        return "";
     }
 
     ttui::Rect GetRect() const override
     {
-        return ttui::Rect(3, 3, 16, 5);
+        return ttui::Rect(0, 1, handle.GetWidth(), handle.GetHeight());
     }
 
     ttui::Border GetBorder() const override
     {
-        return ttui::Border::Single();
+        auto border = ttui::Border::Single();
+        border.slices.at(ttui::Border::Right) = ttui::Border::Slice
+        {
+            "<",
+            ttui::Appearance(ttui::Color::Red(), ttui::Color::BrightBlue(), ttui::Style::None)
+        };
+        return border;
     }
 };
 
 int main()
 {
-    setlocale(LC_ALL, "C.UTF-8");
-
     // init
     ttui::Handle handle;
     handle.Init();
@@ -39,6 +47,7 @@ int main()
 
     // variables
     bool is_running = true;
+    auto my_widget = MyWidget(handle);
 
     // main loop
     while (is_running)
@@ -53,28 +62,13 @@ int main()
             }
         }
 
-        // draw
-        printf("%s", (
-            tcon::SetAppearance(
-                tcon::Style(ttui::Style::All, false),
-                tcon::ColorReset(tcon::Target::Foreground),
-                tcon::ColorReset(tcon::Target::Background)
-            ) +
-            tcon::SetClearScreen()
-        ).c_str());
-        
         // MyWidget
-        handle.Draw(MyWidget());
-        printf("%s", 
-            tcon::SetAppearance(
-                tcon::Style(ttui::Style::All, false),
-                tcon::ColorReset(tcon::Target::Foreground),
-                tcon::ColorReset(tcon::Target::Background)
-            ).c_str()
-        );
+        handle.Render(my_widget);
+
+        handle.Draw();
 
         // roughly 30 fps
-        std::this_thread::sleep_for(std::chrono::milliseconds(33));
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
 
     // clean up

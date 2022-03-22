@@ -6,7 +6,7 @@ namespace ttui
 {
     struct Color
     {
-        Color();
+        Color() = default;
         Color(const Color&) = default;
 
         static Color Black();
@@ -53,12 +53,15 @@ namespace ttui
             Color8bit,
         };
 
-        Type type;
+        Type type = Type::Reset;
 
         union
         {
             uint32_t rgb;
             uint8_t color_8bit;
         };
+
+        bool operator==(const Color& other) const;
+        bool operator!=(const Color& other) const;
     };
 }

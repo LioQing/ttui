@@ -10,11 +10,11 @@
 #include <ttui/Appearance.hpp>
 #include <ttui/Rect.hpp>
 #include <ttui/Border.hpp>
+#include <ttui/Style.hpp>
 
 namespace ttui
 {
     using tcon::InputEvent;
     using tcon::ResizeEvent;
     using tcon::Event;
-    using tcon::Style;
 }

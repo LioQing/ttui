@@ -1,4 +1,4 @@
-#include "ttui/tcon.hpp"
+#include <ttui/tcon.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -219,6 +219,21 @@ namespace tcon
         return std::string(1, ESC) + "[" + std::to_string(y) + ";" + std::to_string(x) + "f";
     }
 
+    std::string SetAppearance(const std::vector<std::string>& vec)
+    {
+        std::string str = "\x1b[";
+
+        for (const auto& seq : vec)
+        {
+            if (!seq.empty())
+                str += seq + ";";
+        }
+
+        str.resize(str.size() - 1);
+
+        return str + "m";
+    }
+
     std::string Color4bit(uint8_t col, Target target)
     {
         if (col < 8)
@@ -258,15 +273,18 @@ namespace tcon
     std::string Style(uint8_t style, bool enable)
     {
         std::string str;
-        if (style & Style::Bold        ) str += std::to_string(1 + !enable * 21);
-        if (style & Style::Dim         ) str += std::to_string(2 + !enable * 20);
-        if (style & Style::Italic      ) str += std::to_string(3 + !enable * 20);
-        if (style & Style::Underline   ) str += std::to_string(4 + !enable * 20);
-        if (style & Style::Blink       ) str += std::to_string(5 + !enable * 20);
-        if (style & Style::Inversed    ) str += std::to_string(6 + !enable * 20);
-        if (style & Style::Invisible   ) str += std::to_string(7 + !enable * 20);
-        if (style & Style::CrossedOut  ) str += std::to_string(8 + !enable * 20);
-        return str;
+        if (style & Style::Bold        ) str += std::to_string(1 + !enable * 21) + ";";
+        if (style & Style::Dim         ) str += std::to_string(2 + !enable * 20) + ";";
+        if (style & Style::Italic      ) str += std::to_string(3 + !enable * 20) + ";";
+        if (style & Style::Underline   ) str += std::to_string(4 + !enable * 20) + ";";
+        if (style & Style::Blink       ) str += std::to_string(5 + !enable * 20) + ";";
+        if (style & Style::Inversed    ) str += std::to_string(6 + !enable * 20) + ";";
+        if (style & Style::Invisible   ) str += std::to_string(7 + !enable * 20) + ";";
+        if (style & Style::CrossedOut  ) str += std::to_string(8 + !enable * 20) + ";";
+
+        if (str.empty())
+            return "";
+        return str.substr(0, str.size() - 1);
     }
 
     std::string SetClearScreen()

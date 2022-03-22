@@ -24,25 +24,27 @@ namespace
         };
 
         return tcon::SetAppearance(
-            ProcessColor(appear.fg_color, true) +
-            ProcessColor(appear.bg_color, false) +
-            tcon::Style(tcon::Style::All, false) +
+        {               
+            ProcessColor(appear.fg_color, true),
+            ProcessColor(appear.bg_color, false),
+            tcon::Style(~appear.style, false),
             tcon::Style(appear.style, true)
-        );
+        });
     }
 }
 
 namespace ttui
 {
-    void Handle::Draw(const Widget& widget)
+    void Handle::Render(const Widget& widget)
     {
         auto rect = widget.GetRect();
         auto border = widget.GetBorder();
-        std::string buf;
 
         for (uint16_t y = 0; y < rect.height; ++y)
         {
             // draw border
+            std::string right_border_str;
+            if (!border.is_none)
             {
                 auto* left = &border.slices.at(Border::Left);
                 auto* right = &border.slices.at(Border::Right);
@@ -69,7 +71,9 @@ namespace ttui
                         mid_str += border.slices.at(mid_slice).str;
                 }
 
-                buf += 
+                auto temp = ProcessAppearance(right->appear);
+
+                buf +=
                     tcon::SetCursorPos(rect.x, rect.y + y) +
                     ProcessAppearance(left->appear) +
                     left->str;
@@ -78,42 +82,63 @@ namespace ttui
                 {
                     buf +=
                         ProcessAppearance(border.slices.at(Border::Bottom).appear) +
-                        mid_str;
+                        mid_str + 
+                        tcon::SetCursorPos(rect.x + rect.width, rect.y + y) +
+                        temp +
+                        right->str;
+
+                    continue;
                 }
                 else
                 {
-                    buf += tcon::SetCursorPos(rect.x + rect.width - 1, rect.y + y);
+                    right_border_str = 
+                        tcon::SetCursorPos(rect.x + rect.width, rect.y + y) +
+                        temp +
+                        right->str;
                 }
-
-                buf +=
-                    ProcessAppearance(right->appear) +
-                    right->str;
             }
 
             // draw string
-            for (uint16_t x = 0, next_x = 0; x < rect.width; x = next_x)
+            uint16_t offset = 0;
+            if (!border.is_none)
+                offset = 1;
+            uint16_t widget_width = rect.width - offset * 2;
+
+            for (uint16_t x = 0, next_x = 0; x < widget_width; x = next_x)
             {
                 Appearance appear;
-                auto str = widget.GetString(y, next_x, appear);
+                auto str = widget.GetString(y - offset, next_x, appear);
+                std::string padding;
 
-                if (x + str.size() > rect.width)
+                if (x + str.size() > widget_width)
                 {
-                    str.resize(rect.width - x);
+                    str.resize(widget_width - x);
+                }
+                else if (str.size() < (size_t)next_x - x)
+                {
+                    padding.resize(next_x - x - str.size(), ' ');
+                }
+                else if (next_x == x)
+                {
+                    padding.resize(widget_width - x - str.size(), ' ');
+                    next_x = widget_width;
                 }
 
                 buf +=
-                    tcon::SetCursorPos(rect.x + x, rect.y + y) +
                     ProcessAppearance(appear) +
-                    str;
-
-                if (next_x == x)
-                {
-                    break;
-                }
+                    str + 
+                    tcon::SetAppearance({ tcon::ColorReset(tcon::Target::Background) }) +
+                    padding;
             }
-        }
 
+            buf += right_border_str;
+        }
+    }
+
+    void Handle::Draw()
+    {
         printf("%s", buf.c_str());
         fflush(stdout);
+        buf.clear();
     }
 }

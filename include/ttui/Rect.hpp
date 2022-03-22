@@ -20,5 +20,8 @@ namespace ttui
         uint16_t Right() const;
         uint16_t Top() const;
         uint16_t Bottom() const;
+
+        bool operator==(const Rect& other) const;
+        bool operator!=(const Rect& other) const;
     };
 }

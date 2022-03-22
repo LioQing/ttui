@@ -2,10 +2,6 @@
 
 namespace ttui
 {
-    Color::Color() : type(Color::Type::Reset)
-    {
-    }
-
     Color Color::Black()
     {
         Color color;
@@ -167,5 +163,24 @@ namespace ttui
         color.color_8bit = col;
 
         return color;
+    }
+
+    bool Color::operator==(const Color& other) const
+    {
+        if (type != other.type)
+            return false;
+        
+        if (type == Type::RGB)
+            return rgb == other.rgb;
+        
+        if (type == Type::Color8bit)
+            return color_8bit == other.color_8bit;
+        
+        return true;
+    }
+
+    bool Color::operator!=(const Color& other) const
+    {
+        return !(operator==(other));
     }
 }

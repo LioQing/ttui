@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include <ttui/tcon.hpp>
 
 namespace ttui
@@ -8,6 +10,10 @@ namespace ttui
 
     struct Handle : tcon::Handle
     {
-        void Draw(const Widget& widget);
+        std::string buf;
+
+        void Render(const Widget& widget);
+
+        void Draw();
     };
 }

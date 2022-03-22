@@ -29,6 +29,7 @@ namespace ttui
             Count
         };
 
+        bool is_none;
         std::array<Slice, Count> slices;
 
         Border();

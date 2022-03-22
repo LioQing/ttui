@@ -26,4 +26,14 @@ namespace ttui
     {
         return y + height;
     }
+
+    bool Rect::operator==(const Rect& other) const
+    {
+        return x == other.x && y == other.y && width == other.width && height == other.height;
+    }
+
+    bool Rect::operator!=(const Rect& other) const
+    {
+        return !(operator==(other));
+    }
 }

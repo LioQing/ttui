@@ -39,5 +39,8 @@ namespace ttui
         uint8_t style = 0;
 
         bool unchanged = false;
+
+        bool operator==(const Appearance& other) const;
+        bool operator!=(const Appearance& other) const;
     };
 }

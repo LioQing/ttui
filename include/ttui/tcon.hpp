@@ -125,6 +125,10 @@ namespace tcon
         };
     };
 
+    /**
+     * @brief A structure to retrieve and store information of the terminal.
+     * 
+     */
     struct Handle
     {
         Handle() = default;
@@ -211,25 +215,12 @@ namespace tcon
     std::string SetCursorPos(uint16_t x, uint16_t y);
 
     /**
-     * @brief Set the appearance (colors & styles).
+     * @brief Set the appearance (colors & styles) from a std::vector.
      * 
-     * @param esc_seq The escape sequences (without the prefix & postfix) of appearances
+     * @param vec The vector containing the escape sequences
      * @return std::string The escape sequence
      */
-    template <typename... EscSeq>
-    std::string SetAppearance(EscSeq&&... esc_seq)
-    {
-        std::string str = "\x1b[";
-        std::vector<std::string> seqs = { esc_seq... };
-
-        for (size_t i = 0; i < seqs.size() - 1; ++i)
-        {
-            str += seqs.at(i) + ";";
-        }
-        str += seqs.back() + "m";
-
-        return str;
-    }
+    std::string SetAppearance(const std::vector<std::string>& vec);
     
     /**
      * @brief Get the escape sequence without the prefix & postfix of the color in 4 bit format (16 colors).

@@ -86,6 +86,8 @@ TEST_TEST_OBJS = $(TEST_TEST_SRCS:$(TEST_DIR)/%.cpp=%.o)
 TEST_TEST_BUILD_DIR = $(TEST_BUILD_DIR)/test
 TEST_TOT_OBJS = $(addprefix $(TEST_TEST_BUILD_DIR)/, $(TEST_TEST_OBJS))
 
+.PHONY: $(TEST_EXE)
+
 -include $(TEST_TOT_OBJS:.o=.d)
 test_build: LDFLAGS = -L./$(DBG_BUILD_DIR)/lib -lttui
 test_build: debug $(TEST_EXE)
@@ -121,5 +123,5 @@ $(TEST_TEST_BUILD_DIR)/%.o: $(TEST_DIR)/%.cpp
 # clean
 .PHONY: clean
 clean:
-	$(RM) $(TEST_LIB) $(REL_LIB) $(DBG_LIB)
+	$(RM) $(TEST_EXE) $(REL_LIB) $(DBG_LIB)
 	find . -type f \( -name *.o -o -name *.d \) -exec $(RM) {} +
