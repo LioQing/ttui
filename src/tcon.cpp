@@ -1,4 +1,4 @@
-#include <ttui/tcon.hpp>
+#include "ttui/tcon.hpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -214,72 +214,74 @@ namespace tcon
         return Handle::initialized;
     }
 
-    void SetCursorPos(uint16_t x, uint16_t y)
+    std::string SetCursorPos(uint16_t x, uint16_t y)
     {
-        printf("%c[%d;%df", ESC, y, x);
+        return std::string(1, ESC) + "[" + std::to_string(y) + ";" + std::to_string(x) + "f";
     }
 
-    void SetColor4bit(uint8_t col, Target target)
+    std::string Color4bit(uint8_t col, Target target)
     {
         if (col < 8)
             col += 30;
         else if (col < 16)
             col += 82;
         
-        printf("%c[%dm", ESC, col + (int)target);
+        return std::to_string(col + (int)target);
     }
 
-    void SetColor8bit(uint8_t col, Target target)
+    std::string Color8bit(uint8_t col, Target target)
     {
-        printf("%c[%d;5;%dm", ESC, (int)target + 38, col);
+        return std::to_string((int)target + 38) + ";5;" + std::to_string(col);
     }
 
-    void SetColor24bit(uint8_t r, uint8_t g, uint8_t b, Target target)
+    std::string Color24bit(uint8_t r, uint8_t g, uint8_t b, Target target)
     {
-        printf("%c[%d;2;%d;%d;%dm", ESC, (int)target + 38, r, g, b);
+        return std::to_string((int)target + 38) + ";2;"
+            + std::to_string(r) + ";"
+            + std::to_string(g) + ";"
+            + std::to_string(b);
     }
 
-    void SetColor24bit(uint32_t rgb, Target target)
+    std::string Color24bit(uint32_t rgb, Target target)
     {
-        printf("%c[%d;2;%d;%d;%dm", ESC, (int)target + 38,
-            rgb / (uint32_t)0x00010000 % 0x100,
-            rgb / (uint32_t)0x00000100 % 0x100,
-            rgb / (uint32_t)0x00000001 % 0x100
-        );
+        return std::to_string((int)target + 38) + ";2;"
+            + std::to_string(rgb / (uint32_t)0x00010000 % 0x100) + ";"
+            + std::to_string(rgb / (uint32_t)0x00000100 % 0x100) + ";"
+            + std::to_string(rgb / (uint32_t)0x00000001 % 0x100);
     }
 
-    void ResetColor(Target target)
+    std::string ColorReset(Target target)
     {
-        printf("%c[%dm", ESC, (int)target + 39);
+        return std::to_string((int)target + 39);
     }
 
-    void SetStyle(uint8_t style, bool enable)
+    std::string Style(uint8_t style, bool enable)
     {
-        if (style & Style::Bold        ) printf("%c[%dm", ESC, 1 + !enable * 21);
-        if (style & Style::Dim         ) printf("%c[%dm", ESC, 2 + !enable * 20);
-        if (style & Style::Italic      ) printf("%c[%dm", ESC, 3 + !enable * 20);
-        if (style & Style::Underline   ) printf("%c[%dm", ESC, 4 + !enable * 20);
-        if (style & Style::Blink       ) printf("%c[%dm", ESC, 5 + !enable * 20);
-        if (style & Style::Inversed    ) printf("%c[%dm", ESC, 6 + !enable * 20);
-        if (style & Style::Invisible   ) printf("%c[%dm", ESC, 7 + !enable * 20);
-        if (style & Style::CrossedOut  ) printf("%c[%dm", ESC, 8 + !enable * 20);
+        std::string str;
+        if (style & Style::Bold        ) str += std::to_string(1 + !enable * 21);
+        if (style & Style::Dim         ) str += std::to_string(2 + !enable * 20);
+        if (style & Style::Italic      ) str += std::to_string(3 + !enable * 20);
+        if (style & Style::Underline   ) str += std::to_string(4 + !enable * 20);
+        if (style & Style::Blink       ) str += std::to_string(5 + !enable * 20);
+        if (style & Style::Inversed    ) str += std::to_string(6 + !enable * 20);
+        if (style & Style::Invisible   ) str += std::to_string(7 + !enable * 20);
+        if (style & Style::CrossedOut  ) str += std::to_string(8 + !enable * 20);
+        return str;
     }
 
-    void ClearScreen()
+    std::string SetClearScreen()
     {
-        SetCursorPos(0, 0);
-        printf("%c[J", 0x1b);
-        fflush(stdout);
+        return SetCursorPos(0, 0) + std::string(1, ESC) + "[J";
     }
 
-    void HideCursor()
+    std::string SetHideCursor()
     {
-        printf("%c[?25l", ESC);
+        return std::string(1, ESC) + "[?25l";
     }
 
-    void ShowCursor()
+    std::string SetShowCursor()
     {
-        printf("%c[?25h", ESC);
+        return std::string(1, ESC) + "[?25h";
     }
 
     namespace

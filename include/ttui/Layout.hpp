@@ -24,8 +24,7 @@ namespace ttui
             std::transform(container.begin(), container.end(), frames.begin(),
             [](const Definition& definition)
             {
-                FrameInfo info;
-                info.widget = std::make_unique<Widget>();
+                WidgetInfo info;
                 info.definition = definition;
                 return info;
             });
@@ -36,7 +35,7 @@ namespace ttui
 
     private:
 
-        struct FrameInfo
+        struct WidgetInfo
         {
             std::unique_ptr<Widget> widget;
             Definition definition;
@@ -44,6 +43,6 @@ namespace ttui
 
         Direction direction = Direction::Horizontal;
 
-        std::vector<FrameInfo> frames;
+        std::vector<WidgetInfo> frames;
     };
 }

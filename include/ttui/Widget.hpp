@@ -3,6 +3,8 @@
 #include <string>
 #include <cstdint>
 
+#include <ttui/Border.hpp>
+
 namespace ttui
 {
     struct Rect;
@@ -10,6 +12,8 @@ namespace ttui
 
     struct Widget
     {
+        virtual ~Widget() {}
+
         /**
          * @brief Get the string to be printed.
          * 
@@ -26,5 +30,12 @@ namespace ttui
          * @return Rect The rectangle
          */
         virtual Rect GetRect() const = 0;
+
+        /**
+         * @brief Get the border of the widget, default to Border::None().
+         * 
+         * @return Border The border
+         */
+        virtual Border GetBorder() const { return Border::None(); }
     };
 }

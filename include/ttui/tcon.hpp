@@ -2,9 +2,11 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 #include <signal.h>
 #include <deque>
 #include <termios.h>
+#include <string>
 
 namespace tcon
 {
@@ -204,73 +206,104 @@ namespace tcon
      * 
      * @param x The x coordinate
      * @param y The y coordinate
+     * @return std::string The escape sequence
      */
-    void SetCursorPos(uint16_t x, uint16_t y);
+    std::string SetCursorPos(uint16_t x, uint16_t y);
+
+    /**
+     * @brief Set the appearance (colors & styles).
+     * 
+     * @param esc_seq The escape sequences (without the prefix & postfix) of appearances
+     * @return std::string The escape sequence
+     */
+    template <typename... EscSeq>
+    std::string SetAppearance(EscSeq&&... esc_seq)
+    {
+        std::string str = "\x1b[";
+        std::vector<std::string> seqs = { esc_seq... };
+
+        for (size_t i = 0; i < seqs.size() - 1; ++i)
+        {
+            str += seqs.at(i) + ";";
+        }
+        str += seqs.back() + "m";
+
+        return str;
+    }
     
     /**
-     * @brief Set the color in 4 bit format (16 colors).
+     * @brief Get the escape sequence without the prefix & postfix of the color in 4 bit format (16 colors).
      * 
      * @param col The color to be set
      * @param target The target (foreground or background)
+     * @return std::string The escape sequence without the prefix & postfix
      */
-    void SetColor4bit(uint8_t col, Target target);
+    std::string Color4bit(uint8_t col, Target target);
 
     /**
-     * @brief Set the color in 8 bit format (256 colors).
+     * @brief Get the escape sequence without the prefix & postfix of the color in 8 bit format (256 colors).
      * 
      * @param col The color to be set
      * @param target The target (foreground or background)
+     * @return std::string The escape sequence without the prefix & postfix
      */
-    void SetColor8bit(uint8_t col, Target target);
+    std::string Color8bit(uint8_t col, Target target);
 
     /**
-     * @brief Set the color in 24 bit format (rgb color).
+     * @brief Get the escape sequence without the prefix & postfix of the color in 24 bit format (rgb color).
      * 
      * @param r Red
      * @param g Breen
      * @param b Blue
      * @param target The target (foreground or background)
+     * @return std::string The escape sequence without the prefix & postfix
      */
-    void SetColor24bit(uint8_t r, uint8_t g, uint8_t b, Target target);
+    std::string Color24bit(uint8_t r, uint8_t g, uint8_t b, Target target);
 
     /**
-     * @brief Set the color in 24 bit format (rgb color).
+     * @brief Get the escape sequence without the prefix & postfix of the color in 24 bit format (rgb color).
      * 
      * @param rgb The color to be set
      * @param target The target (foreground or background)
+     * @return std::string The escape sequence without the prefix & postfix
      */
-    void SetColor24bit(uint32_t rgb, Target target);
+    std::string Color24bit(uint32_t rgb, Target target);
 
     /**
-     * @brief Reset the color to default.
+     * @brief Get the escape sequence without the prefix & postfix of the default color.
      * 
      * @param target The target (foreground or background)
+     * @return std::string The escape sequence without the prefix & postfix
      */
-    void ResetColor(Target target);
+    std::string ColorReset(Target target);
 
     /**
-     * @brief Set the style of text.
+     * @brief Get the escape sequence without the prefix & postfix of the style of text.
      * 
      * @param style The style to be set
      * @param enable Whether enable to disable the style
+     * @return std::string The escape sequence without the prefix & postfix
      */
-    void SetStyle(uint8_t style, bool enable);
+    std::string Style(uint8_t style, bool enable);
 
     /**
      * @brief Clear the screen, cursor position will be (0, 0) after this.
      * 
+     * @return std::string The escape sequence
      */
-    void ClearScreen();
+    std::string SetClearScreen();
 
     /**
      * @brief Hide the cursor.
      * 
+     * @return std::string The escape sequence
      */
-    void HideCursor();
+    std::string SetHideCursor();
 
     /**
      * @brief Show the cursor.
      * 
+     * @return std::string The escape sequence
      */
-    void ShowCursor();
+    std::string SetShowCursor();
 }

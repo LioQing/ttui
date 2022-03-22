@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ttui/ttui.hpp>
+#include <ttui/Color.hpp>
 
 namespace ttui
 {
@@ -11,10 +11,10 @@ namespace ttui
     struct Appearance
     {
         /**
-         * @brief Construct an Appearance object which resets all the appearances.
+         * @brief Construct an Appearance object which resets all the appearance fields.
          * 
          */
-        Appearance();
+        Appearance() = default;
 
         Appearance(const Appearance&) = default;
 
@@ -28,55 +28,16 @@ namespace ttui
         Appearance(const Color& fg_color, const Color& bg_color, uint8_t style);
 
         /**
-         * @brief Set the foreground color.
+         * @brief Construct a special Appearance object which preserve the previous appearance used, all other fields are ignored.
          * 
-         * @param color The foreground color
+         * @return Appearance The special unchanged version of Appearance class
          */
-        void SetForegroundColor(const Color& color);
-
-        /**
-         * @brief Get the foreground color.
-         * 
-         * @return const Color& The foreground color
-         */
-        const Color& GetForegroundColor() const;
-
-        /**
-         * @brief Set the background color.
-         * 
-         * @param color The background color
-         */
-        void SetBackgroundColor(const Color& color);
-
-        /**
-         * @brief Get the background color.
-         * 
-         * @return const Color& The background color
-         */
-        const Color& GetBackgroundColor() const;
-
-        /**
-         * @brief Set the style.
-         * 
-         * @param style The style
-         */
-        void SetStyle(uint8_t style);
-
-        /**
-         * @brief Get the style.
-         * 
-         * @return uint8_t The style
-         */
-        uint8_t GetStyle() const;
-
-    private:
+        static Appearance Unchanged();
 
         Color fg_color = Color::Reset();
         Color bg_color = Color::Reset();
         uint8_t style = 0;
 
-        bool is_none;
-
-        friend Handle;
+        bool unchanged = false;
     };
 }

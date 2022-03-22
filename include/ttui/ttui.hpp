@@ -9,6 +9,7 @@
 #include <ttui/Color.hpp>
 #include <ttui/Appearance.hpp>
 #include <ttui/Rect.hpp>
+#include <ttui/Border.hpp>
 
 namespace ttui
 {
