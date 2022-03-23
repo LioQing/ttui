@@ -14,10 +14,11 @@ namespace ttui
         return border;
     }
 
-    Border Border::Single(const Appearance& appear)
+    Border Border::Single(const std::string& title, const Appearance& appear)
     {
         Border border;
         border.is_none = false;
+        border.title = title;
 
         border.slices.at(Left)        = Slice{ "\u2502", appear };
         border.slices.at(Right)       = Slice{ "\u2502", appear };
@@ -31,10 +32,11 @@ namespace ttui
         return border;
     }
 
-    Border Border::Double(const Appearance& appear)
+    Border Border::Double(const std::string& title, const Appearance& appear)
     {
         Border border;
         border.is_none = false;
+        border.title = title;
 
         border.slices.at(Left)        = Slice{ "\u2551", appear };
         border.slices.at(Right)       = Slice{ "\u2551", appear };
@@ -48,10 +50,11 @@ namespace ttui
         return border;
     }
 
-    Border Border::Thick(const Appearance& appear)
+    Border Border::Thick(const std::string& title, const Appearance& appear)
     {
         Border border;
         border.is_none = false;
+        border.title = title;
 
         border.slices.at(Left)        = Slice{ "\u2503", appear };
         border.slices.at(Right)       = Slice{ "\u2503", appear };
@@ -65,10 +68,11 @@ namespace ttui
         return border;
     }
 
-    Border Border::Custom(const std::array<std::string, Count>& borders, const Appearance& appear)
+    Border Border::Custom(const std::array<std::string, Count>& borders, const std::string& title, const Appearance& appear)
     {
         Border border;
         border.is_none = false;
+        border.title = title;
 
         for (auto i = 0; i < Count; ++i)
         {
@@ -78,11 +82,12 @@ namespace ttui
         return border;
     }
     
-    Border Border::Custom(const std::array<Slice, Count>& borders)
+    Border Border::Custom(const std::array<Slice, Count>& borders, const std::string& title)
     {
         Border border;
         border.is_none = false;
         border.slices = borders;
+        border.title = title;
 
         return border;
     }

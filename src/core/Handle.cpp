@@ -77,8 +77,8 @@ namespace ttui
 {
     void Handle::Render(const Widget& widget)
     {
-        auto rect = widget.GetRect();
-        auto border = widget.GetBorder();
+        const auto rect = widget.GetRect();
+        const auto border = widget.GetBorder();
 
         uint16_t offset = !border.is_none;
         uint16_t widget_width = rect.width - offset * 2;
@@ -133,12 +133,20 @@ namespace ttui
                 if (mid_slice != 0)
                 {
                     buf += ProcessAppearance(border.slices.at(mid_slice).appear);
-                    auto b = ProjectInterval(rect.x + 1, rect.Right() - 1, drawn_intervals);
-                    for (const auto& i : b)
+                    for (const auto& i : ProjectInterval(rect.x + 1, rect.Right() - 1, drawn_intervals))
                     {
                         buf += tcon::SetCursorPos(i.first, rect.y + y);
                         for (uint16_t j = 0; j < (int32_t)i.second - i.first; ++j)
-                            buf += border.slices.at(mid_slice).str;
+                        {
+                            if (mid_slice == Border::Top && i.first + j >= rect.x + 1 && i.first + j < rect.x + border.title.size() + 1)
+                            {
+                                buf += border.title.at(j);
+                            }
+                            else
+                            {
+                                buf += border.slices.at(mid_slice).str;
+                            }
+                        }
                     }
 
                     if (!IsInIntervals(rect.Right() - 1, drawn_intervals))

@@ -31,15 +31,16 @@ namespace ttui
 
         bool is_none;
         std::array<Slice, Count> slices;
+        std::string title;
 
         Border();
         Border(const Border&) = default;
 
         static Border None();
-        static Border Single(const Appearance& appear = Appearance());
-        static Border Double(const Appearance& appear = Appearance());
-        static Border Thick(const Appearance& appear = Appearance());
-        static Border Custom(const std::array<std::string, Count>& borders, const Appearance& appear = Appearance());
-        static Border Custom(const std::array<Slice, Count>& borders);
+        static Border Single(const std::string& title = "", const Appearance& appear = Appearance());
+        static Border Double(const std::string& title = "", const Appearance& appear = Appearance());
+        static Border Thick(const std::string& title = "", const Appearance& appear = Appearance());
+        static Border Custom(const std::array<std::string, Count>& borders, const std::string& title = "", const Appearance& appear = Appearance());
+        static Border Custom(const std::array<Slice, Count>& borders, const std::string& title = "");
     };
 }

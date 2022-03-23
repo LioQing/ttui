@@ -9,6 +9,7 @@
 struct MyWidget : ttui::Widget
 {
     uint16_t y = 15;
+    std::string title;
     const ttui::Handle& handle;
 
     MyWidget(const ttui::Handle& handle) : handle(handle) {}
@@ -59,7 +60,7 @@ struct MyWidget : ttui::Widget
 
     ttui::Border GetBorder() const override
     {
-        auto border = ttui::Border::Single();
+        auto border = ttui::Border::Single(title);
         border.slices.at(ttui::Border::Right) = ttui::Border::Slice
         {
             "<",
@@ -78,7 +79,10 @@ int main()
 
     // variables
     bool is_running = true;
+    
     auto my_widget = MyWidget(handle);
+    my_widget.title = "My Widget";
+
     auto my_text = ttui::Text();
     size_t cursor = 6;
 
@@ -92,7 +96,7 @@ int main()
     my_text.paragraph.AddSpan(5, 4, ttui::Span("line 5 indented test"));
     my_text.paragraph.AddSpan(6, 0, ttui::Span("initial input value"));
 
-    my_text.border = ttui::Border::Double();
+    my_text.border = ttui::Border::Double("My Text");
     my_text.horiz_align = ttui::Align::Center;
     my_text.vert_align = ttui::Align::Center;
 
