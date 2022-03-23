@@ -8,6 +8,7 @@
 
 struct MyWidget : ttui::Widget
 {
+    uint16_t y = 15;
     const ttui::Handle& handle;
 
     MyWidget(const ttui::Handle& handle) : handle(handle) {}
@@ -53,7 +54,7 @@ struct MyWidget : ttui::Widget
 
     ttui::Rect GetRect() const override
     {
-        return ttui::Rect(10, 15, 30, 15);
+        return ttui::Rect(10, y, 30, 15);
     }
 
     ttui::Border GetBorder() const override
@@ -89,8 +90,11 @@ int main()
     my_text.paragraph.AddSpan(0, 72, ttui::Span("This is third", ttui::Appearance(ttui::Color::Blue())));
 
     my_text.paragraph.AddSpan(5, 4, ttui::Span("line 5 indented test"));
-    my_text.paragraph.AddSpan(6, 0, ttui::Span(""));
+    my_text.paragraph.AddSpan(6, 0, ttui::Span("initial input value"));
+
     my_text.border = ttui::Border::Double();
+    my_text.horiz_align = ttui::Align::Center;
+    my_text.vert_align = ttui::Align::Center;
 
     // main loop
     while (is_running)
@@ -106,7 +110,6 @@ int main()
             else if (event.type == ttui::Event::Resize)
             {
                 printf("%s", tcon::SetClearScreen().c_str());
-                fflush(stdout);
             }
             else if (event.type == ttui::Event::Input)
             {
@@ -132,6 +135,19 @@ int main()
                         {
                             --cursor;
                         }
+                    }
+                }
+                else
+                {
+                    if (event.input.code == ttui::InputEvent::Up)
+                    {
+                        ++my_widget.y;
+                        printf("%s", tcon::SetClearScreen().c_str());
+                    }
+                    else if (event.input.code == ttui::InputEvent::Down)
+                    {
+                        --my_widget.y;
+                        printf("%s", tcon::SetClearScreen().c_str());
                     }
                 }
             }

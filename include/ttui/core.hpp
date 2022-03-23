@@ -13,6 +13,7 @@
 #include <ttui/core/Style.hpp>
 #include <ttui/core/Span.hpp>
 #include <ttui/core/Paragraph.hpp>
+#include <ttui/core/Align.hpp>
 
 namespace ttui
 {

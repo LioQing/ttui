@@ -49,6 +49,16 @@ namespace ttui
         return result.second;
     }
 
+    void Paragraph::EraseLine(uint16_t line_no)
+    {
+        map.erase(line_no);
+    }
+
+    const std::map<uint16_t, Span>& Paragraph::GetLine(uint16_t line_no) const
+    {
+        return GetMap().at(line_no);
+    }
+
     bool Paragraph::SwapLines(uint16_t line_no_a, uint16_t line_no_b)
     {
         auto a_itr = map.find(line_no_a);
@@ -59,15 +69,19 @@ namespace ttui
         std::swap(a_itr->second, b_itr->second);
         return true;
     }
-
-    void Paragraph::EraseLine(uint16_t line_no)
+    
+    void Paragraph::SetLineAppearance(uint16_t line_no, const Appearance& appear)
     {
-        map.erase(line_no);
+        for (auto& s : map.at(line_no))
+        {
+            s.second.appear = appear;
+        }
     }
 
-    const std::map<uint16_t, Span>& Paragraph::GetLine(uint16_t line_no) const
+    uint16_t Paragraph::GetLineWidth(uint16_t line_no) const
     {
-        return GetMap().at(line_no);
+        const auto& last = map.at(line_no).rbegin();
+        return last->first + last->second.str.size() - map.at(line_no).begin()->first;
     }
 
     bool Paragraph::HasSpan(uint16_t line_no, uint16_t x_coord) const
@@ -200,5 +214,13 @@ namespace ttui
     const Paragraph::Map& Paragraph::GetMap() const
     {
         return map;
+    }
+
+    uint16_t Paragraph::GetHeight() const
+    {
+        if (map.empty())
+            return 0;
+        
+        return map.rbegin()->first - map.begin()->first + 1;
     }
 }

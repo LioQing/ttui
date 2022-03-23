@@ -7,6 +7,7 @@
 #include <ttui/core/Paragraph.hpp>
 #include <ttui/core/Rect.hpp>
 #include <ttui/core/Border.hpp>
+#include <ttui/core/Align.hpp>
 
 namespace ttui
 {
@@ -15,6 +16,8 @@ namespace ttui
         Paragraph paragraph;
         Rect rect;
         Border border;
+        Align vert_align = Align::Top;
+        Align horiz_align = Align::Left;
 
         Text() = default;
         Text(const Text&) = default;

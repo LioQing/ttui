@@ -181,7 +181,7 @@ namespace tcon
 
                 Event event;
                 event.type = Event::Input;
-                event.input.code = InputEvent::Escape;
+                event.input.code = code;
                 event.input.is_esc = !is_alt;
                 event.input.is_alt = is_alt;
                 event_queue.emplace_back(event);

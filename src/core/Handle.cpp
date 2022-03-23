@@ -57,13 +57,17 @@ namespace
             if (i.first > end)
                 break;
             
-            if (i.first < last)
-                break;
+            if (i.second < last)
+                continue;
             
-            projected.emplace(last, i.first);
+            if (last < i.first)
+                projected.emplace(last, i.first);
+            
             last = i.second;
         }
-        projected.emplace(last, end);
+
+        if (last < end)
+            projected.emplace(last, end);
 
         return projected;
     }
@@ -133,7 +137,7 @@ namespace ttui
                     for (const auto& i : b)
                     {
                         buf += tcon::SetCursorPos(i.first, rect.y + y);
-                        for (uint16_t j = 0; j < i.second - i.first; ++j)
+                        for (uint16_t j = 0; j < (int32_t)i.second - i.first; ++j)
                             buf += border.slices.at(mid_slice).str;
                     }
 
@@ -171,20 +175,26 @@ namespace ttui
                     next_x = widget_width;
                 }
 
-                buf += ProcessAppearance(span.appear);
-                for (const auto& i : ProjectInterval(rect.x + offset + x, rect.x + offset + x + span.str.size(), drawn_intervals))
+                if (!span.str.empty())
                 {
-                    buf += 
-                        tcon::SetCursorPos(i.first, rect.y + y) +
-                        span.str.substr(i.first - x - rect.x - offset, i.second - i.first);
+                    buf += ProcessAppearance(span.appear);
+                    for (const auto& i : ProjectInterval(rect.x + offset + x, rect.x + offset + x + span.str.size(), drawn_intervals))
+                    {
+                        buf += 
+                            tcon::SetCursorPos(i.first, rect.y + y) +
+                            span.str.substr(i.first - x - rect.x - offset, i.second > i.first ? i.second - i.first : 0);
+                    }
                 }
 
-                buf += tcon::SetAppearance({ tcon::ColorReset(tcon::Target::Background) });
-                for (const auto& i : ProjectInterval(rect.x + offset + x + span.str.size(), rect.x + offset + x + next_x, drawn_intervals))
+                if ((size_t)rect.x + offset + next_x > rect.x + offset + x + span.str.size())
                 {
-                    buf += 
-                        tcon::SetCursorPos(i.first, rect.y + y) +
-                        std::string(i.second - i.first, ' ');
+                    buf += tcon::SetAppearance({ tcon::ColorReset(tcon::Target::Background) });
+                    for (const auto& i : ProjectInterval(rect.x + offset + x + span.str.size(), rect.x + offset + next_x, drawn_intervals))
+                    {
+                        buf += 
+                            tcon::SetCursorPos(i.first, rect.y + y) +
+                            std::string(i.second > i.first ? i.second - i.first : 0, ' ');
+                    }
                 }
             }
 
