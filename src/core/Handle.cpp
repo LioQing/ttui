@@ -1,8 +1,9 @@
 #include <ttui/core/Handle.hpp>
 
 #include <cstdint>
+#include <algorithm>
+
 #include <ttui/core/Widget.hpp>
-#include <ttui/core/Rect.hpp>
 #include <ttui/core/Appearance.hpp>
 #include <ttui/core/Span.hpp>
 
@@ -32,6 +33,40 @@ namespace
             tcon::Style(appear.style, true)
         });
     }
+
+    bool IsInIntervals(uint16_t x, const std::map<uint16_t, uint16_t>& intervals)
+    {
+        for (const auto& i : intervals)
+        {
+            if (x >= i.first && x < i.second)
+                return true;
+        }
+        return false;
+    }
+
+    std::map<uint16_t, uint16_t> ProjectInterval(uint16_t start, uint16_t end, const std::map<uint16_t, uint16_t>& intervals)
+    {
+        if (intervals.empty())
+            return std::map<uint16_t, uint16_t>{ { start, end } };
+
+        std::map<uint16_t, uint16_t> projected;
+        auto last = start;
+        
+        for (const auto& i : intervals)
+        {
+            if (i.first > end)
+                break;
+            
+            if (i.first < last)
+                break;
+            
+            projected.emplace(last, i.first);
+            last = i.second;
+        }
+        projected.emplace(last, end);
+
+        return projected;
+    }
 }
 
 namespace ttui
@@ -46,6 +81,19 @@ namespace ttui
 
         for (uint16_t y = 0; y < rect.height; ++y)
         {
+            // check already drawn rects
+            std::map<uint16_t, uint16_t> drawn_intervals;
+            for (const auto& r : drawn_rects)
+            {
+                if (!r.second.TestHorizontalLine(rect.y + y, rect.Left(), rect.Right()))
+                    continue;
+                
+                if (drawn_intervals.empty() || drawn_intervals.rbegin()->second < r.first)
+                    drawn_intervals.emplace(r.first, r.second.Right());
+                else
+                    drawn_intervals.rbegin()->second = r.second.Right();
+            }
+
             // draw border
             std::string right_border_str;
             if (!border.is_none)
@@ -53,8 +101,7 @@ namespace ttui
                 auto* left = &border.slices.at(Border::Left);
                 auto* right = &border.slices.at(Border::Right);
 
-                uint8_t mid_slice;
-                std::string mid_str;
+                uint8_t mid_slice = 0;
 
                 if (y == 0)
                 {
@@ -62,8 +109,6 @@ namespace ttui
                     right = &border.slices.at(Border::TopRight);
 
                     mid_slice = Border::Top;
-                    for (uint16_t i = 0; i < widget_width; ++i)
-                        mid_str += border.slices.at(mid_slice).str;
                 }
                 else if (y == rect.height - 1)
                 {
@@ -71,72 +116,90 @@ namespace ttui
                     right = &border.slices.at(Border::BottomRight);
 
                     mid_slice = Border::Bottom;
-                    for (uint16_t i = 0; i < widget_width; ++i)
-                        mid_str += border.slices.at(mid_slice).str;
                 }
 
-                buf +=
-                    tcon::SetCursorPos(rect.x, rect.y + y) +
-                    ProcessAppearance(left->appear) +
-                    left->str;
-
-                if (!mid_str.empty())
+                if (!IsInIntervals(rect.x, drawn_intervals))
                 {
                     buf +=
-                        ProcessAppearance(border.slices.at(mid_slice).appear) +
-                        mid_str + 
-                        ProcessAppearance(right->appear) +
-                        right->str;
+                        tcon::SetCursorPos(rect.x , rect.y + y) +
+                        ProcessAppearance(left->appear) +
+                        left->str;
+                }
+
+                if (mid_slice != 0)
+                {
+                    buf += ProcessAppearance(border.slices.at(mid_slice).appear);
+                    auto b = ProjectInterval(rect.x + 1, rect.Right() - 1, drawn_intervals);
+                    for (const auto& i : b)
+                    {
+                        buf += tcon::SetCursorPos(i.first, rect.y + y);
+                        for (uint16_t j = 0; j < i.second - i.first; ++j)
+                            buf += border.slices.at(mid_slice).str;
+                    }
+
+                    if (!IsInIntervals(rect.Right() - 1, drawn_intervals))
+                    {
+                        buf +=
+                            tcon::SetCursorPos(rect.Right() - 1, rect.y + y) +
+                            ProcessAppearance(right->appear) +
+                            right->str;
+                    }
 
                     continue;
                 }
-                else
+                else if (!IsInIntervals(rect.Right() - 1, drawn_intervals))
                 {
                     right_border_str = 
+                        tcon::SetCursorPos(rect.Right() - 1, rect.y + y) +
                         ProcessAppearance(right->appear) +
                         right->str;
                 }
-            }
-            else
-            {
-                buf += tcon::SetCursorPos(rect.x, rect.y + y);
             }
 
             // draw string
             for (uint16_t x = 0, next_x = 0; x < widget_width; x = next_x)
             {
                 Span span = widget.GetSpan(y - offset, next_x);
-                std::string padding;
 
                 if (x + span.str.size() > widget_width)
                 {
                     span.str.resize(widget_width - x);
                 }
-                else if (span.str.size() < (size_t)next_x - x)
+                
+                if (next_x == x || next_x > widget_width)
                 {
-                    padding.resize(next_x - x - span.str.size(), ' ');
-                }
-                else if (next_x == x)
-                {
-                    padding.resize(widget_width - x - span.str.size(), ' ');
                     next_x = widget_width;
                 }
 
-                buf +=
-                    ProcessAppearance(span.appear) +
-                    span.str + 
-                    tcon::SetAppearance({ tcon::ColorReset(tcon::Target::Background) }) +
-                    padding;
+                buf += ProcessAppearance(span.appear);
+                for (const auto& i : ProjectInterval(rect.x + offset + x, rect.x + offset + x + span.str.size(), drawn_intervals))
+                {
+                    buf += 
+                        tcon::SetCursorPos(i.first, rect.y + y) +
+                        span.str.substr(i.first - x - rect.x - offset, i.second - i.first);
+                }
+
+                buf += tcon::SetAppearance({ tcon::ColorReset(tcon::Target::Background) });
+                for (const auto& i : ProjectInterval(rect.x + offset + x + span.str.size(), rect.x + offset + x + next_x, drawn_intervals))
+                {
+                    buf += 
+                        tcon::SetCursorPos(i.first, rect.y + y) +
+                        std::string(i.second - i.first, ' ');
+                }
             }
 
             buf += right_border_str;
         }
+        
+        drawn_rects.emplace(rect.Left(), rect);
     }
 
     void Handle::Draw()
     {
         printf("%s", buf.c_str());
         fflush(stdout);
+
         buf.clear();
+        drawn_rects.clear();
     }
 }

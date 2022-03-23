@@ -12,7 +12,7 @@ BUILD_DIR = build
 TEST_DIR = test
 
 # flags
-CXXFLAGS = $(addprefix -I, $(INC_DIR)) -std=c++14
+CXXFLAGS = $(addprefix -I, $(INC_DIR)) -std=c++11
 DBG_FLAGS = -Wall -pedantic-errors -g
 REL_FLAGS = -O3
 TEST_FLAGS = $(DBG_FLAGS) -I$(TEST_DIR)

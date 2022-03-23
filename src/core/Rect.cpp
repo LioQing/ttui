@@ -27,6 +27,25 @@ namespace ttui
         return y + height;
     }
 
+    bool Rect::IsOverlapped(const Rect& other) const
+    {
+        return 
+            Top() < other.Bottom() &&
+            Bottom() > other.Top() &&
+            Left() < other.Right() &&
+            Right() > other.Left();
+    }
+
+    bool Rect::TestPoint(uint16_t x, uint16_t y) const
+    {
+        return y >= Top() && y < Bottom() && x >= Left() && x < Right();
+    }
+
+    bool Rect::TestHorizontalLine(uint16_t y, uint16_t start_x, uint16_t end_x) const
+    {
+        return y >= Top() && y < Bottom() && start_x < Right() && end_x >= Left();
+    }
+
     bool Rect::operator==(const Rect& other) const
     {
         return x == other.x && y == other.y && width == other.width && height == other.height;

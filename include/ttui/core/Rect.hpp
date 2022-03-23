@@ -21,6 +21,10 @@ namespace ttui
         uint16_t Top() const;
         uint16_t Bottom() const;
 
+        bool IsOverlapped(const Rect& other) const;
+        bool TestPoint(uint16_t x, uint16_t y) const;
+        bool TestHorizontalLine(uint16_t y, uint16_t start_x, uint16_t end_x) const;
+
         bool operator==(const Rect& other) const;
         bool operator!=(const Rect& other) const;
     };
