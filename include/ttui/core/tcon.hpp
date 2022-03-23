@@ -30,6 +30,7 @@ namespace tcon
             Enter = 13,
             Escape = 27,
             Tab = 9,
+            Backspace = 127,
         };
 
         uint8_t code;

@@ -59,11 +59,11 @@ struct MyWidget : ttui::Widget
     ttui::Border GetBorder() const override
     {
         auto border = ttui::Border::Single();
-        // border.slices.at(ttui::Border::Right) = ttui::Border::Slice
-        // {
-        //     "<",
-        //     ttui::Appearance(ttui::Color::Red(), ttui::Color::BrightBlue(), ttui::Style::None)
-        // };
+        border.slices.at(ttui::Border::Right) = ttui::Border::Slice
+        {
+            "<",
+            ttui::Appearance(ttui::Color::Red(), ttui::Color::BrightBlue(), ttui::Style::None)
+        };
         return border;
     }
 };
@@ -79,6 +79,7 @@ int main()
     bool is_running = true;
     auto my_widget = MyWidget(handle);
     auto my_text = ttui::Text();
+    size_t cursor = 6;
 
     my_text.paragraph.AddSpan(0, 0, ttui::Span("Hello World! This is first line."));
 
@@ -88,36 +89,7 @@ int main()
     my_text.paragraph.AddSpan(0, 72, ttui::Span("This is third", ttui::Appearance(ttui::Color::Blue())));
 
     my_text.paragraph.AddSpan(5, 4, ttui::Span("line 5 indented test"));
-    my_text.paragraph.AddSpan(6, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(7, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(8, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(9, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(10, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(11, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(12, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(13, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(14, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(15, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(16, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(17, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(18, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(19, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(20, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(21, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(22, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(23, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(24, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(25, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(26, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(27, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(28, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(29, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(30, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(31, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(32, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(33, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-    my_text.paragraph.AddSpan(34, 0, ttui::Span("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-
+    my_text.paragraph.AddSpan(6, 0, ttui::Span(""));
     my_text.border = ttui::Border::Double();
 
     // main loop
@@ -136,6 +108,33 @@ int main()
                 printf("%s", tcon::SetClearScreen().c_str());
                 fflush(stdout);
             }
+            else if (event.type == ttui::Event::Input)
+            {
+                if (!event.input.is_esc)
+                {
+                    if (isprint(event.input.code) || event.input.code == '\n')
+                    {
+                        auto span = my_text.paragraph.GetSpan(cursor, 0);
+                        span.str.push_back(event.input.code);
+                        my_text.paragraph.SetSpan(cursor, 0, span);
+                        if (event.input.code == '\n')
+                            ++cursor;
+                    }
+                    else if (event.input.code == ttui::InputEvent::Backspace)
+                    {
+                        auto span = my_text.paragraph.GetSpan(cursor, 0);
+                        if (!span.str.empty())
+                        {
+                            span.str.pop_back();
+                            my_text.paragraph.SetSpan(cursor, 0, span);
+                        }
+                        else if (cursor > 6)
+                        {
+                            --cursor;
+                        }
+                    }
+                }
+            }
         }
 
         my_text.rect = ttui::Rect(1, 3, handle.GetWidth() - 20, handle.GetHeight() - 10);
@@ -145,8 +144,8 @@ int main()
         handle.Render(my_text);
         handle.Draw();
 
-        // roughly 30 fps
-        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        // roughly 60 fps
+        std::this_thread::sleep_for(std::chrono::milliseconds(15));
     }
 
     // clean up
