@@ -2,20 +2,11 @@
 
 namespace ttui
 {
-    Definition Definition::Proportion(uint32_t prop)
+    Definition Definition::Relative(float perc)
     {
         Definition def;
-        def.type = Definition::Type::Proportion;
-        def.proportion = prop;
-
-        return def;
-    }
-
-    Definition Definition::Percentage(float perc)
-    {
-        Definition def;
-        def.type = Definition::Type::Percentage;
-        def.percentage = perc;
+        def.type = Definition::Type::Relative;
+        def.relative = perc;
 
         return def;
     }

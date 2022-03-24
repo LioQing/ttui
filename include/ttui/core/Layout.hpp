@@ -8,41 +8,70 @@
 #include <ttui/core/Direction.hpp>
 #include <ttui/core/Widget.hpp>
 #include <ttui/core/Definition.hpp>
+#include <ttui/core/Rect.hpp>
 
 namespace ttui
 {
-    struct Layout
+    struct Layout : Widget
     {
-        void SetDirection(Direction direction);
+        Layout() = default;
+        Layout(Layout&& other) = default;
 
-        template <typename TContainer, typename TValue = typename TContainer::value_type>
-        void SetDefinitions(const TContainer& container)
-        {
-            static_assert(std::is_same<TValue, Definition>::value, "value type is not Definition");
+        Layout(Direction dir, const Rect& rect);
 
-            frames.resize(container.size());
-            std::transform(container.begin(), container.end(), frames.begin(),
-            [](const Definition& definition)
-            {
-                WidgetInfo info;
-                info.definition = definition;
-                return info;
-            });
-        }
+        void SetDirection(Direction dir);
+
+        void SetDefinitions(const std::vector<Definition>& container);
+
+        bool IsInitialized(size_t index) const;
 
         Widget& GetWidget(size_t index);
         Definition& GetDefinition(size_t index);
 
+        const Widget& GetWidget(size_t index) const;
+        const Definition& GetDefinition(size_t index) const;
+
+        template <typename TWidget>
+        void SetWidget(size_t index, TWidget&& widget);
+
+        Rect GetWidgetRect(size_t index) const;
+        size_t GetWidgetCount() const;
+
+        Span GetSpan(uint16_t, uint16_t&, const Rect&) const override;
+        bool Enabled() const override;
+        void Recursion(Handle& handle, const Rect& rect) const override;
+
     private:
 
-        struct WidgetInfo
+        void UpdateDef() const;
+
+        struct Frame
         {
+            Frame();
+            Frame(Frame&& other) = default;
+            
             std::unique_ptr<Widget> widget;
-            Definition definition;
+            
+            Definition def;
+
+            mutable uint16_t pos;
+            mutable uint16_t size;
         };
 
-        Direction direction = Direction::Horizontal;
+        Direction dir = Direction::Horizontal;
+        mutable Rect rect;
 
-        std::vector<WidgetInfo> frames;
+        std::vector<Frame> frames;
+        mutable bool require_def_update = false;
     };
+}
+
+template <typename TWidget>
+void ttui::Layout::SetWidget(size_t index, TWidget&& widget)
+{
+    using NonRefTWidget = typename std::remove_reference<TWidget>::type;
+
+    static_assert(std::is_base_of<Widget, NonRefTWidget>::value, "widget is not base of Widget");
+
+    frames.at(index).widget = std::unique_ptr<NonRefTWidget>(new NonRefTWidget(std::forward<TWidget>(widget)));
 }

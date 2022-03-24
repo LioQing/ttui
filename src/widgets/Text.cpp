@@ -1,8 +1,10 @@
 #include <ttui/widgets/Text.hpp>
 
+#include <ttui/core/Rect.hpp>
+
 namespace ttui
 {
-    Span Text::GetSpan(uint16_t y, uint16_t& next_x) const
+    Span Text::GetSpan(uint16_t y, uint16_t& next_x, const Rect& rect) const
     {
         {
             int32_t tmp = rect.height - !border.is_none * 2 - paragraph.GetHeight();
@@ -49,11 +51,6 @@ namespace ttui
         if (next_itr != line.end())
             next_x = next_itr->first + x_align;
         return span_itr->second;
-    }
-
-    Rect Text::GetRect() const
-    {
-        return rect;
     }
 
     Border Text::GetBorder() const

@@ -75,13 +75,50 @@ namespace
 
 namespace ttui
 {
+    void Handle::Render(const Widget& widget, const Rect& rect)
+    {
+        if (widget.Enabled())
+            HiddenRender(widget, rect);
+
+        pps.emplace_back([this, &widget, rect](){ widget.Recursion(*this, rect); });
+
+        if (in_render)
+            return;
+        
+        in_render = true;
+        
+        while (!pps.empty())
+        {
+            pps.front()();
+            pps.pop_front();
+        }
+
+        in_render = false;
+    }
+
     void Handle::Render(const Widget& widget)
     {
-        const auto rect = widget.GetRect();
+        Render(widget, Rect(1, 1, GetWidth(), GetHeight()));
+    }
+
+    void Handle::Draw()
+    {
+        printf("%s", buf.c_str());
+        fflush(stdout);
+
+        buf.clear();
+        drawn_rects.clear();
+    }
+
+    void Handle::HiddenRender(const Widget& widget, const Rect& rect)
+    {
+        if (rect.width == 0 || rect.height == 0)
+            return;
+
         const auto border = widget.GetBorder();
 
         uint16_t offset = !border.is_none;
-        uint16_t widget_width = rect.width - offset * 2;
+        uint16_t widget_width = rect.width < offset * 2 ? 0 : rect.width - offset * 2;
 
         for (uint16_t y = 0; y < rect.height; ++y)
         {
@@ -171,7 +208,7 @@ namespace ttui
             // draw string
             for (uint16_t x = 0, next_x = 0; x < widget_width; x = next_x)
             {
-                Span span = widget.GetSpan(y - offset, next_x);
+                Span span = widget.GetSpan(y - offset, next_x, rect);
 
                 if (x + span.str.size() > widget_width)
                 {
@@ -210,14 +247,5 @@ namespace ttui
         }
         
         drawn_rects.emplace(rect.Left(), rect);
-    }
-
-    void Handle::Draw()
-    {
-        printf("%s", buf.c_str());
-        fflush(stdout);
-
-        buf.clear();
-        drawn_rects.clear();
     }
 }

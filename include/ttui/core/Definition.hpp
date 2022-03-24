@@ -13,20 +13,12 @@ namespace ttui
         Definition(const Definition&) = default;
 
         /**
-         * @brief Define layout with proportion. Example, { Proportion(1), Proportion(2) } will get 1:2.
-         * 
-         * @param prop The proportion
-         * @return Definition The definition
-         */
-        static Definition Proportion(uint32_t prop);
-
-        /**
-         * @brief Define layout with percentage. Example, { Percentage(50.5f) } will get 50.5%.
+         * @brief Define layout with relative size. Example, { Percentage(0.505f) } will get 50.5% of the total layout size.
          * 
          * @param perc The percentage
          * @return Definition The definition
          */
-        static Definition Percentage(float perc);
+        static Definition Relative(float perc);
 
         /**
          * @brief Define layout with length. Example, { Length(5) } will get the length of 5 characters.
@@ -58,15 +50,14 @@ namespace ttui
          */
         enum class Type
         {
-            Proportion, Percentage, Length, Max, Min,
+            Relative, Length, Max, Min,
         };
 
         Type type;
 
         union
         {
-            uint32_t proportion;
-            float percentage;
+            float relative;
             uint16_t length;
             uint16_t max;
             uint16_t min;

@@ -8,13 +8,13 @@
 
 struct MyWidget : ttui::Widget
 {
-    uint16_t y = 15;
     std::string title;
+    ttui::Rect rect;
     const ttui::Handle& handle;
 
     MyWidget(const ttui::Handle& handle) : handle(handle) {}
 
-    ttui::Span GetSpan(uint16_t y, uint16_t& next_x) const override
+    ttui::Span GetSpan(uint16_t y, uint16_t& next_x, const ttui::Rect& rect) const override
     {
         if (y == 0 && next_x == 0)
         {
@@ -40,6 +40,19 @@ struct MyWidget : ttui::Widget
             appear.style = ttui::Style::Italic | ttui::Style::Blink;
             return ttui::Span(std::string("Height: ") + std::to_string(handle.GetHeight()), appear);
         }
+        else if (y == 2 && next_x == 0)
+        {
+            next_x = 1;
+            return ttui::Span();
+        }
+        else if (y == 2 && next_x == 1)
+        {
+            return ttui::Span(
+                std::to_string(rect.x) + ' ' +
+                std::to_string(rect.y) + ' ' +
+                std::to_string(rect.width) + ' ' +
+                std::to_string(rect.height));
+        }
         else if (y < handle.GetHeight() - 3 && y > 0 && next_x == 0)
         {
             next_x = handle.GetWidth() / 2 - 7;
@@ -51,11 +64,6 @@ struct MyWidget : ttui::Widget
         }
 
         return ttui::Span();
-    }
-
-    ttui::Rect GetRect() const override
-    {
-        return ttui::Rect(10, y, 30, 15);
     }
 
     ttui::Border GetBorder() const override
@@ -79,26 +87,53 @@ int main()
 
     // variables
     bool is_running = true;
-    
-    auto my_widget = MyWidget(handle);
-    my_widget.title = "My Widget";
-
-    auto my_text = ttui::Text();
+    ttui::Layout layout(ttui::Direction::Horizontal, ttui::Rect(1, 1, 100, 30));
+    auto widget_y = 15;
     size_t cursor = 6;
+    auto my_widget = MyWidget(handle);
+    
+    {
+        my_widget.title = "My Widget";
 
-    my_text.paragraph.AddSpan(0, 0, ttui::Span("Hello World! This is first line."));
+        auto my_text = ttui::Text();
 
-    my_text.paragraph.AddSpan(0, 50, ttui::Span("This is second appear." , 
-        ttui::Appearance(ttui::Color::Red(), ttui::Color::Green(), ttui::Style::Italic)));
+        my_text.paragraph.AddSpan(0, 0, ttui::Span("Hello World! This is first line."));
 
-    my_text.paragraph.AddSpan(0, 72, ttui::Span("This is third", ttui::Appearance(ttui::Color::Blue())));
+        my_text.paragraph.AddSpan(0, 50, ttui::Span("This is second appear." , 
+            ttui::Appearance(ttui::Color::Red(), ttui::Color::Green(), ttui::Style::Italic)));
 
-    my_text.paragraph.AddSpan(5, 4, ttui::Span("line 5 indented test"));
-    my_text.paragraph.AddSpan(6, 0, ttui::Span("initial input value"));
+        my_text.paragraph.AddSpan(0, 72, ttui::Span("This is third", ttui::Appearance(ttui::Color::Blue())));
 
-    my_text.border = ttui::Border::Double("My Text");
-    my_text.horiz_align = ttui::Align::Center;
-    my_text.vert_align = ttui::Align::Center;
+        my_text.paragraph.AddSpan(5, 4, ttui::Span("line 5 indented test"));
+        my_text.paragraph.AddSpan(6, 0, ttui::Span("initial input value"));
+
+        my_text.border = ttui::Border::Double("My Text");
+        my_text.horiz_align = ttui::Align::Center;
+        my_text.vert_align = ttui::Align::Center;
+
+        layout.SetDefinitions(
+            {
+                ttui::Definition::Length(30),
+                ttui::Definition::Length(6),
+            }
+        );
+
+        ttui::Layout layout2(ttui::Direction::Vertical, ttui::Rect());
+        layout2.SetDefinitions(
+            {
+                ttui::Definition::Length(20),
+                ttui::Definition::Length(6),
+            }
+        );
+
+        layout2.SetWidget(0, my_widget);
+        layout2.SetWidget(1, my_widget);
+
+        layout.SetWidget(0, std::move(my_text));
+        layout.SetWidget(1, std::move(layout2));
+    }
+
+    auto& my_text = (ttui::Text&)layout.GetWidget(0);
 
     // main loop
     while (is_running)
@@ -145,23 +180,20 @@ int main()
                 {
                     if (event.input.code == ttui::InputEvent::Up)
                     {
-                        ++my_widget.y;
+                        ++widget_y;
                         printf("%s", tcon::SetClearScreen().c_str());
                     }
                     else if (event.input.code == ttui::InputEvent::Down)
                     {
-                        --my_widget.y;
+                        --widget_y;
                         printf("%s", tcon::SetClearScreen().c_str());
                     }
                 }
             }
         }
 
-        my_text.rect = ttui::Rect(1, 3, handle.GetWidth() - 20, handle.GetHeight() - 10);
-
-        // MyWidget
-        handle.Render(my_widget);
-        handle.Render(my_text);
+        // layout
+        handle.Render(layout, ttui::Rect(10, 10, 130, 30));
         handle.Draw();
 
         // roughly 60 fps
