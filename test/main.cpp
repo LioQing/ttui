@@ -113,15 +113,16 @@ int main()
 
         layout.SetDefinitions(
             {
-                ttui::Definition::Length(30),
-                ttui::Definition::Length(6),
+                ttui::Definition::Min(30),
+                ttui::Definition::Relative(0.5),
+                ttui::Definition::Min(30),
             }
         );
 
         ttui::Layout layout2(ttui::Direction::Vertical, ttui::Rect());
         layout2.SetDefinitions(
             {
-                ttui::Definition::Length(20),
+                ttui::Definition::Max(20),
                 ttui::Definition::Length(6),
             }
         );
@@ -129,8 +130,9 @@ int main()
         layout2.SetWidget(0, my_widget);
         layout2.SetWidget(1, my_widget);
 
-        layout.SetWidget(0, std::move(my_text));
+        layout.SetWidget(0, my_text);
         layout.SetWidget(1, std::move(layout2));
+        layout.SetWidget(2, my_widget);
     }
 
     auto& my_text = (ttui::Text&)layout.GetWidget(0);
@@ -193,7 +195,7 @@ int main()
         }
 
         // layout
-        handle.Render(layout, ttui::Rect(10, 10, 130, 30));
+        handle.Render(layout);
         handle.Draw();
 
         // roughly 60 fps

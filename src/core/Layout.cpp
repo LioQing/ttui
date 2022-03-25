@@ -106,23 +106,25 @@ namespace ttui
 
     void Layout::UpdateDef() const
     {
-        auto pos = rect.x;
+        if (frames.empty())
+            return;
+
+        auto start_pos = rect.x;
         auto size = rect.width;
         if (dir == Direction::Vertical)
         {
-            pos = rect.y;
+            start_pos = rect.y;
             size = rect.height;
         }
 
         // required size
         uint16_t curr_pos = 0;
         std::vector<size_t> available;
-        uint16_t min_sum = 0;
 
         for (size_t i = 0; i < frames.size(); ++i)
         {
             const auto& f = frames.at(i);
-            f.pos = curr_pos + pos;
+            f.pos = curr_pos + start_pos;
 
             if (curr_pos >= size)
             {
@@ -138,71 +140,82 @@ namespace ttui
             {
                 f.size = f.def.relative * size;
             }
-            else if (f.def.type == Definition::Type::Min)
-            {
-                f.size = f.def.min;
-
-                min_sum += f.size;
-                available.push_back(i);
-            }
-            else if (f.def.type == Definition::Type::Max)
+            else
             {
                 f.size = 0;
-
                 available.push_back(i);
             }
 
-            if (f.size > size - f.pos)
-                f.size = size - f.pos;
+            if (f.size + f.pos > size + start_pos)
+                f.size = size + start_pos - f.pos;
 
             curr_pos += f.size;
         }
 
-        if (frames.back().pos + frames.back().size < pos + size)
+        // if there is available, distribute the remaining space including the reminader
+        // else distribute the space to the last one
+        if (!available.empty())
         {
-            frames.back().size = pos + size - frames.back().pos;
-            require_def_update = false;
-            return;
+            auto remaining = size - curr_pos;
+            auto remaining_distr = remaining / available.size();
+            auto remaining_remainder = remaining % available.size();
+
+            for (size_t i = 0; i < available.size(); ++i)
+            {
+                auto& f = frames.at(available.at(i));
+                f.size += remaining_distr;
+
+                // keep the size <= max or >= min and distribute the extra space to other frames
+                if (f.def.type == Definition::Type::Max)
+                {
+                    if (f.size > f.def.max)
+                    {
+                        f.size = f.def.max;
+                        remaining -= f.size;
+                        remaining_remainder += 1;
+                    }
+                }
+                else if (f.def.type == Definition::Type::Min)
+                {
+                    if (f.size < f.def.min)
+                    {
+                        f.size = f.def.min;
+                        remaining -= f.size;
+                        remaining_remainder += 1;
+                    }
+                }
+
+                if (remaining_remainder > 0)
+                {
+                    f.size += 1;
+                    --remaining_remainder;
+                }
+            }
         }
 
-        if (frames.size() == 1)
+        // re evaluate the pos of the frames
+        curr_pos = 0;
+        for (auto& f : frames)
         {
-            frames.front().size = pos + size - frames.front().pos;
-            require_def_update = false;
-            return;
-        }
-
-        // auto allocated size
-        // uint16_t distr_value = size - curr_pos;
-
-        // std::sort(available.begin(), available.end(), 
-        // [&](size_t a, size_t b){ return frames.at(a).size > frames.at(b).size; });
-        
-        // size_t i = 0;
-        // uint16_t target;
-        // for (; i < available.size(); ++i)
-        // {
-        //     target = (distr_value + min_sum) / (available.size() - i);
-        //     if (target > frames.at(available.at(i)).size)
-        //         break;
+            f.pos = curr_pos + start_pos;
             
-        //     min_sum -= frames.at(available.at(i)).size;
-        // }
+            if (f.pos > size + start_pos)
+            {
+                f.size = 0;
+            }
+            else if (f.pos + f.size > size + start_pos)
+            {
+                f.size = size + start_pos - f.pos;
+            }
 
-        // distr_value -= target * (i + 1);
-        // for (size_t j = i; j < available.size(); ++j)
-        // {
-        //     frames.at(available.at(j)).size = target + (j - i < distr_value);
-        // }
+            curr_pos += f.size;
+        }
 
-        // curr_pos = frames.front().size;
-        // for (size_t i = 1; i < frames.size(); ++i)
-        // {
-        //     frames.at(i).pos = curr_pos;
-        //     curr_pos += frames.at(i).size;
-        // }
-
-        // frames.back().size = size - frames.back().pos;
+        // if there is remaining space, distribute it to the last frame
+        if (size - curr_pos > 0)
+        {
+            frames.back().size += size - curr_pos;
+        }
 
         require_def_update = false;
     }
