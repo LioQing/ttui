@@ -21,7 +21,7 @@ namespace ttui
 
         void SetDirection(Direction dir);
 
-        void SetDefinitions(const std::vector<Definition>& container);
+        void SetDefinitions(const std::vector<Definition>& defs);
 
         bool IsInitialized(size_t index) const;
 

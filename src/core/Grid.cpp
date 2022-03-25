@@ -1,4 +1,4 @@
-#include <ttui/core/Layout.hpp>
+#include <ttui/core/Grid.hpp>
 
 #include <cmath>
 #include <numeric>
@@ -9,103 +9,120 @@
 
 namespace ttui
 {
-    Layout::Layout(Direction dir, const Rect& rect) : dir(dir), rect(rect)
+    Grid::Grid(const Rect& rect) : rect(rect)
     {
     }
 
-    void Layout::SetDirection(Direction dir)
+    void ttui::Grid::SetDefinitions(const std::vector<Definition>& col_defs, const std::vector<Definition>& row_defs)
     {
-        this->dir = dir;
-        require_def_update = true;
-    }
+        this->col_frames = std::vector<Frame>(col_defs.size());
+        std::transform(col_defs.begin(), col_defs.end(), this->col_frames.begin(), 
+        [](const Definition& def) { return Frame(def); });
 
-    void ttui::Layout::SetDefinitions(const std::vector<Definition>& defs)
-    {
-        frames.resize(defs.size());
+        this->row_frames = std::vector<Frame>(row_defs.size());
+        std::transform(row_defs.begin(), row_defs.end(), this->row_frames.begin(), 
+        [](const Definition& def) { return Frame(def); });
 
-        for (size_t i = 0; i < defs.size(); ++i)
+        frames.resize(row_defs.size());
+        for (auto& row : frames)
         {
-            frames.at(i).def = defs.at(i);
+            row.resize(col_defs.size());
         }
 
-        require_def_update = true;
+        require_col_def_update = true;
+        require_row_def_update = true;
     }
 
-    bool Layout::IsInitialized(size_t index) const
+    bool Grid::IsInitialized(size_t x, size_t y) const
     {
-        return frames.at(index).widget != nullptr;
+        return frames.at(y).at(x) != nullptr;
     }
 
-    Widget& Layout::GetWidget(size_t index)
+    Widget& Grid::GetWidget(size_t x, size_t y)
     {
-        return *frames.at(index).widget;
+        return *frames.at(y).at(x);
     }
 
-    Definition& Layout::GetDefinition(size_t index)
+    Definition& Grid::GetColumnDefinition(size_t x)
     {
-        require_def_update = true;
-        return frames.at(index).def;
+        require_col_def_update = true;
+        return col_frames.at(x).def;
     }
 
-    const Widget& Layout::GetWidget(size_t index) const
+    Definition& Grid::GetRowDefinition(size_t y)
     {
-        return *frames.at(index).widget;
+        require_row_def_update = true;
+        return row_frames.at(y).def;
     }
 
-    const Definition& Layout::GetDefinition(size_t index) const
+    const Widget& Grid::GetWidget(size_t x, size_t y) const
     {
-        return frames.at(index).def;
+        return *frames.at(y).at(x);
     }
 
-    Rect Layout::GetWidgetRect(size_t index) const
+    const Definition& Grid::GetColumnDefinition(size_t x) const
     {
-        if (require_def_update)
-            UpdateDef();
+        return col_frames.at(x).def;
+    }
 
-        auto rect = this->rect;
+    const Definition& Grid::GetRowDefinition(size_t y) const
+    {
+        return row_frames.at(y).def;
+    }
 
-        if (dir == Direction::Vertical)
-        {
-            rect.y = frames.at(index).pos;
-            rect.height = frames.at(index).size;
-        }
-        else
-        {
-            rect.x = frames.at(index).pos;
-            rect.width = frames.at(index).size;
-        }
+    Rect Grid::GetWidgetRect(size_t x, size_t y) const
+    {
+        if (require_col_def_update)
+            UpdateDef(Direction::Horizontal);
+
+        if (require_row_def_update)
+            UpdateDef(Direction::Vertical);
+
+        Rect rect;
+
+        rect.y = row_frames.at(y).pos;
+        rect.height = row_frames.at(y).size;
+        rect.x = col_frames.at(x).pos;
+        rect.width = col_frames.at(x).size;
 
         return rect;
     }
 
-    size_t Layout::GetWidgetCount() const
+    size_t Grid::GetColumnCount() const
     {
-        return frames.size();
+        return col_frames.size();
     }
 
-    Span Layout::GetSpan(uint16_t, uint16_t&, const Rect&) const
+    size_t Grid::GetRowCount() const
+    {
+        return row_frames.size();
+    }
+
+    Span Grid::GetSpan(uint16_t, uint16_t&, const Rect&) const
     {
         return Span();
     }
 
-    bool Layout::Enabled() const
+    bool Grid::Enabled() const
     {
         return false;
     }
 
-    void Layout::Recursion(Handle& handle, const Rect& rect) const
+    void Grid::Recursion(Handle& handle, const Rect& rect) const
     {
         this->rect = rect;
-        require_def_update = true;
+        require_col_def_update = true;
+        require_row_def_update = true;
         
-        for (size_t i = 0; i < GetWidgetCount(); ++i)
+        for (size_t y = 0; y < GetRowCount(); ++y)
+        for (size_t x = 0; x < GetColumnCount(); ++x)
         {
-            if (IsInitialized(i))
-                handle.Render(GetWidget(i), GetWidgetRect(i));
+            if (IsInitialized(x, y))
+                handle.Render(GetWidget(x, y), GetWidgetRect(x, y));
         }
     }
 
-    void Layout::UpdateDef() const
+    void Grid::UpdateDef(Direction dir) const
     {
         if (frames.empty())
             return;
@@ -117,6 +134,8 @@ namespace ttui
             start_pos = rect.y;
             size = rect.height;
         }
+
+        auto& frames = dir == Direction::Horizontal ? col_frames : row_frames;
 
         // required size
         uint16_t curr_pos = 0;
@@ -220,10 +239,17 @@ namespace ttui
             frames.back().size += size - curr_pos;
         }
 
-        require_def_update = false;
+        if (dir == Direction::Horizontal)
+            require_col_def_update = false;
+        else
+            require_row_def_update = false;
     }
 
-    Layout::Frame::Frame() : widget(nullptr), def(Definition::Relative(1.f))
+    Grid::Frame::Frame() : def(Definition::Relative(1.f))
+    {
+    }
+
+    Grid::Frame::Frame(const Definition& def) : def(def) 
     {
     }
 }

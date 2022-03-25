@@ -14,6 +14,7 @@
 #include <ttui/core/Span.hpp>
 #include <ttui/core/Paragraph.hpp>
 #include <ttui/core/Align.hpp>
+#include <ttui/core/Grid.hpp>
 
 namespace ttui
 {

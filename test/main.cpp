@@ -113,26 +113,30 @@ int main()
 
         layout.SetDefinitions(
             {
-                ttui::Definition::Fit(50, 0),
-                ttui::Definition::Absolute(7),
+                ttui::Definition::Fit(),
                 ttui::Definition::Fit(),
             }
         );
 
-        ttui::Layout layout2(ttui::Direction::Vertical, ttui::Rect());
-        layout2.SetDefinitions(
+        ttui::Grid grid;
+        grid.SetDefinitions(
             {
-                ttui::Definition::Fit(0, 20),
+                ttui::Definition::Fit(),
+                ttui::Definition::Absolute(6),
+            },
+            {
+                ttui::Definition::Fit(),
                 ttui::Definition::Absolute(6),
             }
         );
 
-        layout2.SetWidget(0, my_widget);
-        layout2.SetWidget(1, my_widget);
+        grid.SetWidget(0, 0, my_widget);
+        grid.SetWidget(0, 1, my_widget);
+        grid.SetWidget(1, 0, my_widget);
+        grid.SetWidget(1, 1, my_widget);
 
         layout.SetWidget(0, my_text);
-        layout.SetWidget(1, std::move(layout2));
-        layout.SetWidget(2, my_widget);
+        layout.SetWidget(1, std::move(grid));
     }
 
     auto& my_text = (ttui::Text&)layout.GetWidget(0);
