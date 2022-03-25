@@ -11,29 +11,21 @@ namespace ttui
         return def;
     }
 
-    Definition Definition::Length(uint16_t length)
+    Definition Definition::Absolute(uint16_t absolute)
     {
         Definition def;
-        def.type = Definition::Type::Length;
-        def.length = length;
+        def.type = Definition::Type::Absolute;
+        def.absolute = absolute;
 
         return def;
     }
 
-    Definition Definition::Max(uint16_t max)
+    Definition Definition::Fit(uint16_t min, uint16_t max)
     {
         Definition def;
-        def.type = Definition::Type::Max;
-        def.max = max;
-
-        return def;
-    }
-
-    Definition Definition::Min(uint16_t min)
-    {
-        Definition def;
-        def.type = Definition::Type::Min;
-        def.min = min;
+        def.type = Definition::Type::Fit;
+        def.fit.min = min;
+        def.fit.max = max;
 
         return def;
     }

@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <list>
 
 #include <ttui/core/Handle.hpp>
 #include <ttui/core/Span.hpp>
@@ -119,7 +120,7 @@ namespace ttui
 
         // required size
         uint16_t curr_pos = 0;
-        std::vector<size_t> available;
+        std::list<size_t> auto_frames;
 
         for (size_t i = 0; i < frames.size(); ++i)
         {
@@ -132,9 +133,9 @@ namespace ttui
                 continue;
             }
 
-            if (f.def.type == Definition::Type::Length)
+            if (f.def.type == Definition::Type::Absolute)
             {
-                f.size = f.def.length;
+                f.size = f.def.absolute;
             }
             else if (f.def.type == Definition::Type::Relative)
             {
@@ -143,7 +144,7 @@ namespace ttui
             else
             {
                 f.size = 0;
-                available.push_back(i);
+                auto_frames.push_back(i);
             }
 
             if (f.size + f.pos > size + start_pos)
@@ -152,43 +153,45 @@ namespace ttui
             curr_pos += f.size;
         }
 
-        // if there is available, distribute the remaining space including the reminader
-        // else distribute the space to the last one
-        if (!available.empty())
+        // distribute the remaining space to auto frames with the remainders
+        if (auto_frames.size() > 0)
         {
-            auto remaining = size - curr_pos;
-            auto remaining_distr = remaining / available.size();
-            auto remaining_remainder = remaining % available.size();
+            int32_t remaining = size - curr_pos;
+            int32_t auto_size;
+            int32_t remainders_size;
 
-            for (size_t i = 0; i < available.size(); ++i)
+            while (remaining > 0 && !auto_frames.empty())
             {
-                auto& f = frames.at(available.at(i));
-                f.size += remaining_distr;
-
-                // keep the size <= max or >= min and distribute the extra space to other frames
-                if (f.def.type == Definition::Type::Max)
+                auto_size = remaining / auto_frames.size();
+                remainders_size = remaining % auto_frames.size();
+                remaining = 0;
+                for (auto itr = auto_frames.begin(); itr != auto_frames.end();)
                 {
-                    if (f.size > f.def.max)
+                    auto& f = frames.at(*itr);
+                    f.size += auto_size;
+                    if (remainders_size > 0)
                     {
-                        f.size = f.def.max;
-                        remaining -= f.size;
-                        remaining_remainder += 1;
+                        f.size += 1;
+                        --remainders_size;
                     }
-                }
-                else if (f.def.type == Definition::Type::Min)
-                {
-                    if (f.size < f.def.min)
-                    {
-                        f.size = f.def.min;
-                        remaining -= f.size;
-                        remaining_remainder += 1;
-                    }
-                }
 
-                if (remaining_remainder > 0)
-                {
-                    f.size += 1;
-                    --remaining_remainder;
+                    auto erase_itr = itr++;
+
+                    // if frame is over max size, add it to remaining and set it to max size
+                    if (f.def.fit.max != 0 && f.size > f.def.fit.max)
+                    {
+                        remaining += f.size - f.def.fit.max;
+                        f.size = f.def.fit.max;
+                        auto_frames.erase(erase_itr);
+                    }
+
+                    // if frame is under min size, subtract it from remaining and set it to min size
+                    if (f.def.fit.min != 0 && f.size < f.def.fit.min)
+                    {
+                        remaining -= f.def.fit.min - f.size;
+                        f.size = f.def.fit.min;
+                        auto_frames.erase(erase_itr);
+                    }
                 }
             }
         }

@@ -21,28 +21,19 @@ namespace ttui
         static Definition Relative(float perc);
 
         /**
-         * @brief Define layout with length. Example, { Length(5) } will get the length of 5 characters.
+         * @brief Define layout with absolute length. Example, { Absolute(5) } will get the length of 5 characters.
          * 
-         * @param length The length
+         * @param absolute The absolute length
          * @return Definition The definition
          */
-        static Definition Length(uint16_t length);
+        static Definition Absolute(uint16_t absolute);
 
         /**
-         * @brief Define layout with max length.
+         * @brief Define the layout with auto resizing length.
          * 
-         * @param max The max length
          * @return Definition The definition
          */
-        static Definition Max(uint16_t max);
-        
-        /**
-         * @brief Define layout with min length.
-         * 
-         * @param max The min length
-         * @return Definition The definition
-         */
-        static Definition Min(uint16_t min);
+        static Definition Fit(uint16_t min = 0, uint16_t max = 0);
 
         /**
          * @brief Enum type of definition.
@@ -50,17 +41,16 @@ namespace ttui
          */
         enum class Type
         {
-            Relative, Length, Max, Min,
+            Relative, Absolute, Fit,
         };
 
-        Type type;
+        Type type = Type::Fit;
 
         union
         {
             float relative;
-            uint16_t length;
-            uint16_t max;
-            uint16_t min;
+            uint16_t absolute;
+            struct { uint16_t min, max; } fit;
         };
     
     private:

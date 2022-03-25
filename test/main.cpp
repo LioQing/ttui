@@ -113,17 +113,17 @@ int main()
 
         layout.SetDefinitions(
             {
-                ttui::Definition::Min(30),
-                ttui::Definition::Relative(0.5),
-                ttui::Definition::Min(30),
+                ttui::Definition::Fit(50, 0),
+                ttui::Definition::Absolute(7),
+                ttui::Definition::Fit(),
             }
         );
 
         ttui::Layout layout2(ttui::Direction::Vertical, ttui::Rect());
         layout2.SetDefinitions(
             {
-                ttui::Definition::Max(20),
-                ttui::Definition::Length(6),
+                ttui::Definition::Fit(0, 20),
+                ttui::Definition::Absolute(6),
             }
         );
 
