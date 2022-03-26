@@ -1,5 +1,5 @@
 # TTUI - Tiny Terminal User Interface
- A lightweight TUI library written in C++11 for Linux.
+ A lightweight TUI library for C++11 for Linux.
 
 ![screenshot](screenshot.png)
 
