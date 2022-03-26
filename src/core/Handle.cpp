@@ -215,7 +215,7 @@ namespace ttui
                     span.str.resize(widget_width - x);
                 }
                 
-                if (next_x <= x || next_x > widget_width)
+                if (next_x == x || next_x > widget_width)
                 {
                     next_x = widget_width;
                 }
