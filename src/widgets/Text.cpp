@@ -6,6 +6,13 @@ namespace ttui
 {
     Span Text::GetSpan(uint16_t y, uint16_t& next_x, const Rect& rect) const
     {
+        if (y == 0)
+        {
+            wrap_y_offset = 0;
+            wrap_x_offset = 0;
+        }
+
+        // y align
         {
             int32_t tmp = rect.height - !border.is_none * 2 - paragraph.GetHeight();
             if (tmp > 0)
@@ -17,15 +24,28 @@ namespace ttui
             }
         }
 
+        y -= wrap_y_offset;
+
+        if (y < 0)
+            return Span();
+
+        if (wrap_start_offset > 0)
+        {
+            next_x = wrap_start_offset;
+            wrap_start_offset = 0;
+            return Span();
+        }
+
         // line
         auto line_itr = paragraph.GetMap().find(y);
         if (line_itr == paragraph.GetMap().end() || line_itr->second.empty())
             return Span();
 
-        // align
+        // x align
+        uint16_t widget_width = rect.width - !border.is_none * 2;
         uint16_t x_align = 0;
         {
-            int32_t tmp = rect.width - !border.is_none * 2 - paragraph.GetLineWidth(y);
+            int32_t tmp = widget_width - paragraph.GetLineWidth(y);
             if (tmp > 0)
             {
                 if (horiz_align == Align::Center)
@@ -38,7 +58,12 @@ namespace ttui
         // span
         const auto& line = line_itr->second;
         
-        auto span_itr = next_x >= x_align ? line.find(next_x - x_align) : line.end();
+        auto span_itr = line.end();
+        if (next_x + wrap_x_offset >= x_align)
+        {
+            span_itr = std::prev(line.upper_bound(next_x + wrap_x_offset - x_align));
+        }
+        
         if (span_itr == line.end())
         {
             if (next_x == 0)
@@ -47,10 +72,33 @@ namespace ttui
             return Span();
         }
 
+        Span span = span_itr->second;
+        span.str = span.str.substr(wrap_x_offset > span_itr->first ? wrap_x_offset - span_itr->first : 0);
+
         auto next_itr = std::next(span_itr);
-        if (next_itr != line.end())
+
+        if (is_wrapped && next_x + span.str.size() > (size_t)widget_width)
+        {
+            ++wrap_y_offset;
+            wrap_x_offset += widget_width;
+            wrap_x_offset -= wrap_x_offset % widget_width;
+        }
+        else if (next_itr == line.end())
+        {
+            wrap_x_offset = 0;
+        }
+        else if (is_wrapped && next_itr->first > widget_width)
+        {
+            wrap_y_offset += next_itr->first / widget_width;
+            wrap_x_offset += next_itr->first;
+            wrap_start_offset = next_itr->first % widget_width;
+        }
+        else
+        {
             next_x = next_itr->first + x_align;
-        return span_itr->second;
+        }
+
+        return span;
     }
 
     Border Text::GetBorder() const
