@@ -24,7 +24,7 @@ namespace ttui
          * 
          * @param y The local y coordinate, always start at 0
          * @param x The local x coordinate, always start at 0 for each line
-         * @param rect The bounding rectangle of the widget
+         * @param rect The bounding rectangle of the widget (excluding border)
          * @return Span The span
          */
         virtual Span GetSpan(uint16_t y, uint16_t x, const Rect& rect) const = 0;
@@ -47,7 +47,7 @@ namespace ttui
          * @brief This will be called after the widget is rendered, tail call optimization is implemented. Mostly for internal use.
          * 
          * @param handle Reference to the handle
-         * @param rect The bounding rectangle of the widget
+         * @param rect The bounding rectangle of the widget (excluding border)
          */
         virtual void Recursion(Handle& handle, const Rect& rect) const {}
     };

@@ -80,7 +80,12 @@ namespace ttui
         if (widget.Enabled())
             HiddenRender(widget, rect);
 
-        pps.emplace_back([this, &widget, rect](){ widget.Recursion(*this, rect); });
+        Rect widget_rect;
+        widget_rect.x = rect.x + !widget.GetBorder().is_none;
+        widget_rect.y = rect.y + !widget.GetBorder().is_none;
+        widget_rect.width = rect.width - !widget.GetBorder().is_none * 2;
+        widget_rect.height = rect.height - !widget.GetBorder().is_none * 2;
+        pps.emplace_back([this, &widget, widget_rect](){ widget.Recursion(*this, widget_rect); });
 
         if (in_render)
             return;
@@ -209,7 +214,7 @@ namespace ttui
             bool is_last_empty = false;
             for (uint16_t x = 0; x < widget_width;)
             {
-                Span span = widget.GetSpan(y - offset, x, rect);
+                Span span = widget.GetSpan(y - offset, x, Rect(rect.x + offset, rect.y + y, widget_width, rect.height - offset * 2));
 
                 auto next_x = IsInIntervals(x + offset, drawn_intervals);
                 if (next_x > -1)

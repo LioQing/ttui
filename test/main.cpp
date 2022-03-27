@@ -54,10 +54,10 @@ int main()
         // text widget
         ttui::Text my_text;
         my_text.border = ttui::Border::Single("Typing Test");
-        my_text.horiz_align = ttui::Align::Left;
+        my_text.horiz_align = ttui::Align::Right;
+        my_text.vert_align = ttui::Align::Bottom;
 
-        my_text.paragraph.AddSpan(0, 0, ttui::Span("Type something: yesy"));
-        my_text.paragraph.AddSpan(0, 31, ttui::Span("Type something: yesy", ttui::Appearance(ttui::Color::BrightBlue())));
+        my_text.paragraph.AddSpan(0, 0, ttui::Span("Type something:"));
         my_text.paragraph.AddSpan(1, 0, ttui::Span("", ttui::Appearance(ttui::Color::BrightYellow())));
 
         layout.SetWidget(0, my_text);
@@ -66,7 +66,7 @@ int main()
         ttui::Layout inner_layout;
         inner_layout.SetDirection(ttui::Direction::Vertical);
         inner_layout.SetDefinitions({
-            ttui::Definition::Absolute(10),
+            ttui::Definition::Relative(0.7f),
             ttui::Definition::Fit(),
         });
 

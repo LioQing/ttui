@@ -9,22 +9,12 @@ struct MyWidget : ttui::Widget
 
     ttui::Span GetSpan(uint16_t y, uint16_t x, const ttui::Rect& rect) const override
     {
-        if (y == 0 && next_x == 0)
-        {
-            next_x = 1;
-            return ttui::Span();
-        }
-        else if (y == 0 && next_x == 1)
+        if (y == 0 && x == 1)
         {
             return ttui::Span("This is my custom widget!", 
                 ttui::Appearance(ttui::Color::Red(), ttui::Color::Reset(), ttui::Style::Blink));
         }
-        else if (y == 1 && next_x == 0)
-        {
-            next_x = 1;
-            return ttui::Span();
-        }
-        else if (y == 1 && next_x == 1)
+        else if (y == 1 && x == 1)
         {
             return ttui::Span("Press Ctrl + C to exit", 
                 ttui::Appearance(ttui::Color::Red(), ttui::Color::Reset(), ttui::Style::Blink));
