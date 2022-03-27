@@ -25,15 +25,15 @@ TEST_FLAGS = $(DBG_FLAGS) -I$(TEST_DIR)
 SRCS = $(shell find $(SRC_DIR) -name *.cpp)
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=%.o)
 
-# dependencies
--include $(OBJS:.o=.d)
-
 #########
 # debug #
 #########
 DBG_BUILD_DIR = $(BUILD_DIR)/debug
 DBG_LIB = $(DBG_BUILD_DIR)/lib/$(TARGET).a
 DBG_OBJS = $(addprefix $(DBG_BUILD_DIR)/obj/, $(OBJS))
+
+# dependencies
+-include $(DBG_OBJS:.o=.d)
 
 debug: CXXFLAGS += $(DBG_FLAGS)
 debug: $(DBG_LIB)
@@ -56,6 +56,9 @@ $(DBG_BUILD_DIR)/obj/%.o: $(SRC_DIR)/%.cpp
 REL_BUILD_DIR = $(BUILD_DIR)/release
 REL_LIB = $(REL_BUILD_DIR)/lib/$(TARGET).a
 REL_OBJS = $(addprefix $(REL_BUILD_DIR)/obj/, $(OBJS))
+
+# dependencies
+-include $(REL_OBJS:.o=.d)
 
 release: CXXFLAGS += $(REL_FLAGS)
 release: $(REL_LIB)

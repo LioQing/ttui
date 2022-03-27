@@ -7,7 +7,7 @@ struct MyWidget : ttui::Widget
 {
     std::string title = "My Widget Title!";
 
-    ttui::Span GetSpan(uint16_t y, uint16_t& next_x, const ttui::Rect& rect) const override
+    ttui::Span GetSpan(uint16_t y, uint16_t x, const ttui::Rect& rect) const override
     {
         if (y == 0 && next_x == 0)
         {

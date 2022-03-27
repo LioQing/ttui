@@ -12,6 +12,10 @@ namespace ttui
 {
     struct Rect;
 
+    /**
+     * @brief A widget to display texts.
+     * 
+     */
     struct Text : Widget
     {
         Paragraph paragraph;
@@ -22,7 +26,7 @@ namespace ttui
         Text() = default;
         Text(const Text&) = default;
 
-        Span GetSpan(uint16_t y, uint16_t& next_x, const Rect& rect) const override;
+        Span GetSpan(uint16_t y, uint16_t x, const Rect& rect) const override;
         Border GetBorder() const override;
     };
 }

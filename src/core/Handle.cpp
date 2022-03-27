@@ -34,14 +34,14 @@ namespace
         });
     }
 
-    bool IsInIntervals(uint16_t x, const std::map<uint16_t, uint16_t>& intervals)
+    int32_t IsInIntervals(uint16_t x, const std::map<uint16_t, uint16_t>& intervals)
     {
         for (const auto& i : intervals)
         {
             if (x >= i.first && x < i.second)
-                return true;
+                return i.second;
         }
-        return false;
+        return -1;
     }
 
     std::map<uint16_t, uint16_t> ProjectInterval(uint16_t start, uint16_t end, const std::map<uint16_t, uint16_t>& intervals)
@@ -159,7 +159,7 @@ namespace ttui
                     mid_slice = Border::Bottom;
                 }
 
-                if (!IsInIntervals(rect.x, drawn_intervals))
+                if (IsInIntervals(rect.x, drawn_intervals) == -1)
                 {
                     buf +=
                         tcon::SetCursorPos(rect.x , rect.y + y) +
@@ -186,7 +186,7 @@ namespace ttui
                         }
                     }
 
-                    if (!IsInIntervals(rect.Right() - 1, drawn_intervals))
+                    if (IsInIntervals(rect.Right() - 1, drawn_intervals) == -1)
                     {
                         buf +=
                             tcon::SetCursorPos(rect.Right() - 1, rect.y + y) +
@@ -196,7 +196,7 @@ namespace ttui
 
                     continue;
                 }
-                else if (!IsInIntervals(rect.Right() - 1, drawn_intervals))
+                else if (IsInIntervals(rect.Right() - 1, drawn_intervals) == -1)
                 {
                     right_border_str = 
                         tcon::SetCursorPos(rect.Right() - 1, rect.y + y) +
@@ -206,40 +206,37 @@ namespace ttui
             }
 
             // draw string
-            for (uint16_t x = 0, next_x = 0; x < widget_width; x = next_x)
+            bool is_last_empty = false;
+            for (uint16_t x = 0; x < widget_width;)
             {
-                Span span = widget.GetSpan(y - offset, next_x, rect);
+                Span span = widget.GetSpan(y - offset, x, rect);
 
-                if (x + span.str.size() > widget_width)
+                auto next_x = IsInIntervals(x + offset, drawn_intervals);
+                if (next_x > -1)
                 {
-                    span.str.resize(widget_width - x);
-                }
-                
-                if (next_x == x || next_x > widget_width)
-                {
-                    next_x = widget_width;
+                    x = next_x;
+                    continue;
                 }
 
-                if (!span.str.empty())
+                if (span.str.empty())
+                {
+                    if (!is_last_empty)
+                        buf += tcon::SetAppearance({ tcon::ColorReset(tcon::Target::Background) });
+                    buf += ' ';
+                    is_last_empty = true;
+                    ++x;
+                }
+                else
                 {
                     buf += ProcessAppearance(span.appear);
-                    for (const auto& i : ProjectInterval(rect.x + offset + x, rect.x + offset + x + span.str.size(), drawn_intervals))
+                    for (const auto& i : ProjectInterval(rect.x + x + offset, rect.x + x + offset + span.str.size(), drawn_intervals))
                     {
-                        buf += 
+                        buf +=
                             tcon::SetCursorPos(i.first, rect.y + y) +
-                            span.str.substr(i.first - x - rect.x - offset, i.second > i.first ? i.second - i.first : 0);
+                            span.str.substr(i.first - x - offset - rect.x, i.second - i.first);
                     }
-                }
-
-                if ((size_t)rect.x + offset + next_x > rect.x + offset + x + span.str.size())
-                {
-                    buf += tcon::SetAppearance({ tcon::ColorReset(tcon::Target::Background) });
-                    for (const auto& i : ProjectInterval(rect.x + offset + x + span.str.size(), rect.x + offset + next_x, drawn_intervals))
-                    {
-                        buf += 
-                            tcon::SetCursorPos(i.first, rect.y + y) +
-                            std::string(i.second > i.first ? i.second - i.first : 0, ' ');
-                    }
+                    is_last_empty = false;
+                    x += span.str.size();
                 }
             }
 

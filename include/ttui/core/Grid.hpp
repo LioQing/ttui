@@ -41,7 +41,7 @@ namespace ttui
         size_t GetColumnCount() const;
         size_t GetRowCount() const;
 
-        Span GetSpan(uint16_t, uint16_t&, const Rect&) const override;
+        Span GetSpan(uint16_t, uint16_t, const Rect&) const override;
         bool Enabled() const override;
         void Recursion(Handle& handle, const Rect& rect) const override;
 

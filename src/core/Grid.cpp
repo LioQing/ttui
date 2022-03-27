@@ -98,7 +98,7 @@ namespace ttui
         return row_frames.size();
     }
 
-    Span Grid::GetSpan(uint16_t, uint16_t&, const Rect&) const
+    Span Grid::GetSpan(uint16_t, uint16_t, const Rect&) const
     {
         return Span();
     }

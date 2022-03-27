@@ -83,7 +83,7 @@ namespace ttui
         return frames.size();
     }
 
-    Span Layout::GetSpan(uint16_t, uint16_t&, const Rect&) const
+    Span Layout::GetSpan(uint16_t, uint16_t, const Rect&) const
     {
         return Span();
     }

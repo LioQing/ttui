@@ -23,11 +23,11 @@ namespace ttui
          * @brief Get the span to be printed.
          * 
          * @param y The local y coordinate, always start at 0
-         * @param next_x Passed in as current x coordinate, always start at 0, expect to get next x coordinate (if unchanged, next call will be new line, y incremented)
+         * @param x The local x coordinate, always start at 0 for each line
          * @param rect The bounding rectangle of the widget
          * @return Span The span
          */
-        virtual Span GetSpan(uint16_t y, uint16_t& next_x, const Rect& rect) const = 0;
+        virtual Span GetSpan(uint16_t y, uint16_t x, const Rect& rect) const = 0;
 
         /**
          * @brief Get the border of the widget, default to Border::None().

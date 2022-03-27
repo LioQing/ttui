@@ -7,24 +7,14 @@ struct MyWidget : ttui::Widget
 {
     std::string title = "My Widget Title!";
 
-    ttui::Span GetSpan(uint16_t y, uint16_t& next_x, const ttui::Rect& rect) const override
+    ttui::Span GetSpan(uint16_t y, uint16_t x, const ttui::Rect& rect) const override
     {
-        if (y == 0 && next_x == 0)
-        {
-            next_x = 1;
-            return ttui::Span();
-        }
-        else if (y == 0 && next_x == 1)
+        if (y == 0 && x == 1)
         {
             return ttui::Span("This is my custom widget!", 
                 ttui::Appearance(ttui::Color::Red(), ttui::Color::Reset(), ttui::Style::Blink));
         }
-        else if (y == 1 && next_x == 0)
-        {
-            next_x = 1;
-            return ttui::Span();
-        }
-        else if (y == 1 && next_x == 1)
+        else if (y == 1 && x == 1)
         {
             return ttui::Span("Press Ctrl + C to exit", 
                 ttui::Appearance(ttui::Color::Red(), ttui::Color::Reset(), ttui::Style::Blink));
@@ -57,16 +47,17 @@ int main()
         // create the main layout
         layout.SetDirection(ttui::Direction::Horizontal);
         layout.SetDefinitions({
-            ttui::Definition::Relative(0.7f),
+            ttui::Definition::Absolute(60),
             ttui::Definition::Fit(),
         });
 
         // text widget
         ttui::Text my_text;
         my_text.border = ttui::Border::Single("Typing Test");
-        my_text.horiz_align = ttui::Align::Center;
+        my_text.horiz_align = ttui::Align::Left;
 
-        my_text.paragraph.AddSpan(0, 0, ttui::Span("Type something:"));
+        my_text.paragraph.AddSpan(0, 0, ttui::Span("Type something: yesy"));
+        my_text.paragraph.AddSpan(0, 31, ttui::Span("Type something: yesy", ttui::Appearance(ttui::Color::BrightBlue())));
         my_text.paragraph.AddSpan(1, 0, ttui::Span("", ttui::Appearance(ttui::Color::BrightYellow())));
 
         layout.SetWidget(0, my_text);
