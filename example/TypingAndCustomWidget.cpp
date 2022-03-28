@@ -72,9 +72,7 @@ int main()
 
         inner_layout.SetWidget(0, MyWidget());
 
-        ttui::Text empty;
-        empty.border = ttui::Border::Single();
-        inner_layout.SetWidget(1, empty);
+        inner_layout.SetWidget(1, ttui::Empty(ttui::Border::Single()));
 
         layout.SetWidget(1, std::move(inner_layout));
     }
