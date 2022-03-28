@@ -36,10 +36,7 @@ int main()
     ttui::Handle handle;
     handle.Init();
 
-    std::cout << 
-        tcon::SetHideCursor() <<
-        tcon::SetClearScreen();
-    std::cout.flush();
+    ttui::cursor::SetVisible(false);
 
     // layout and widgets
     ttui::Layout layout;
@@ -136,10 +133,8 @@ int main()
     }
 
     // clean up
-    std::cout << 
-        tcon::SetShowCursor() <<
-        tcon::SetClearScreen();
-    std::cout.flush();
+    ttui::cursor::SetVisible(true);
+    ttui::screen::Clear();
 
     return 0;
 }

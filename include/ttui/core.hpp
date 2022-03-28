@@ -16,6 +16,8 @@
 #include <ttui/core/Align.hpp>
 #include <ttui/core/Grid.hpp>
 #include <ttui/core/Wrap.hpp>
+#include <ttui/core/cursor.hpp>
+#include <ttui/core/screen.hpp>
 
 namespace ttui
 {
