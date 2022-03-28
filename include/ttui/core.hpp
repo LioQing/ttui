@@ -15,6 +15,7 @@
 #include <ttui/core/Paragraph.hpp>
 #include <ttui/core/Align.hpp>
 #include <ttui/core/Grid.hpp>
+#include <ttui/core/Wrap.hpp>
 
 namespace ttui
 {

@@ -55,6 +55,7 @@ int main()
         ttui::Text my_text;
         my_text.border = ttui::Border::Single("Typing Test");
         my_text.horiz_align = ttui::Align::Center;
+        my_text.wrap = ttui::Wrap::Word;
 
         my_text.paragraph.AddSpan(0, 0, ttui::Span("Type something:"));
         my_text.paragraph.AddSpan(1, 0, ttui::Span("", ttui::Appearance(ttui::Color::BrightYellow())));

@@ -216,6 +216,9 @@ namespace ttui
             {
                 Span span = widget.GetSpan(y - offset, x, Rect(rect.x + offset, rect.y + y, widget_width, rect.height - offset * 2));
 
+                if (x + span.str.size() > widget_width)
+                    span.str = span.str.substr(0, widget_width - x);
+
                 auto next_x = IsInIntervals(x + offset, drawn_intervals);
                 if (next_x > -1)
                 {

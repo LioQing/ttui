@@ -47,15 +47,15 @@ int main()
         // create the main layout
         layout.SetDirection(ttui::Direction::Horizontal);
         layout.SetDefinitions({
-            ttui::Definition::Absolute(60),
+            ttui::Definition::Relative(0.7f),
             ttui::Definition::Fit(),
         });
 
         // text widget
         ttui::Text my_text;
         my_text.border = ttui::Border::Single("Typing Test");
-        my_text.horiz_align = ttui::Align::Right;
-        my_text.vert_align = ttui::Align::Bottom;
+        my_text.horiz_align = ttui::Align::Center;
+        my_text.wrap = ttui::Wrap::Word;
 
         my_text.paragraph.AddSpan(0, 0, ttui::Span("Type something:"));
         my_text.paragraph.AddSpan(1, 0, ttui::Span("", ttui::Appearance(ttui::Color::BrightYellow())));
@@ -66,7 +66,7 @@ int main()
         ttui::Layout inner_layout;
         inner_layout.SetDirection(ttui::Direction::Vertical);
         inner_layout.SetDefinitions({
-            ttui::Definition::Relative(0.7f),
+            ttui::Definition::Absolute(10),
             ttui::Definition::Fit(),
         });
 

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <ttui/core/Span.hpp>
+#include <ttui/core/Wrap.hpp>
 
 namespace ttui
 {
@@ -40,7 +41,12 @@ namespace ttui
         const Map& GetMap() const;
         uint16_t GetHeight() const;
 
+        Paragraph Wrapped(Wrap wrap, uint16_t width) const;
+
     private:
+
+        Paragraph SpanWrapped(uint16_t width) const;
+        Paragraph WordWrapped(uint16_t width) const;
 
         Map map;
     };

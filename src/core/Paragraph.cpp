@@ -80,6 +80,8 @@ namespace ttui
 
     uint16_t Paragraph::GetLineWidth(uint16_t line_no) const
     {
+        if (map.at(line_no).empty())
+            return 0;
         const auto& last = map.at(line_no).rbegin();
         return last->first + last->second.str.size() - map.at(line_no).begin()->first;
     }
@@ -222,5 +224,101 @@ namespace ttui
             return 0;
         
         return map.rbegin()->first - map.begin()->first + 1;
+    }
+
+    Paragraph Paragraph::Wrapped(Wrap wrap, uint16_t width) const
+    {
+        Paragraph wrapped;
+
+        if      (wrap == Wrap::Word) wrapped = WordWrapped(width);
+        else if (wrap == Wrap::Span) wrapped = SpanWrapped(width);
+
+        return wrapped;
+    }
+
+    Paragraph Paragraph::SpanWrapped(uint16_t width) const
+    {
+        Map wrapped_map;
+
+        int32_t line_offset = 0;
+        int32_t x_offset = 0;
+        int32_t y_offset = 0;
+
+        for (const auto& line : map)
+        {
+            x_offset = 0;
+            y_offset = 0;
+
+            wrapped_map.emplace(line.first + line_offset, std::map<uint16_t, Span>());
+
+            for (auto itr = line.second.begin(); itr != line.second.end(); ++itr)
+            {
+                auto pos = itr->first + x_offset - y_offset * width;
+                const auto& span = itr->second;
+
+                if (span.str.size() <= width && pos + span.str.size() > width)
+                {
+                    ++y_offset;
+                    wrapped_map.emplace(line.first + line_offset + y_offset, std::map<uint16_t, Span>());
+
+                    if (pos < width)
+                    {
+                        x_offset += width - pos;
+                    }
+
+                    pos = itr->first + x_offset - y_offset * width;
+                }
+                else if (span.str.size() > width)
+                {
+                    x_offset -= pos + span.str.size() - width;
+                }
+                
+                wrapped_map.at(line.first + line_offset + y_offset).emplace(pos, span);
+            }
+
+            line_offset += y_offset;
+        }
+
+        return Paragraph(wrapped_map);
+    }
+
+    Paragraph Paragraph::WordWrapped(uint16_t width) const
+    {
+        Paragraph wrapped(map);
+
+        auto Split = [](const std::string& str) -> std::map<uint16_t, std::string>
+        {
+            std::map<uint16_t, std::string> words;
+
+            auto last_itr = str.begin();
+            for (auto itr = last_itr; itr != str.end(); ++itr)
+            {
+                if (*itr == ' ')
+                {
+                    words.emplace(last_itr - str.begin(), std::string(last_itr, itr));
+                    last_itr = itr + 1;
+                }
+            }
+
+            if (last_itr != str.end())
+                words.emplace(std::distance(str.begin(), last_itr), std::string(last_itr, str.end()));
+
+            return words;
+        };
+
+        // for each line in wrapped_word, for each span in line, split the span into words
+        for (auto& line : wrapped.map)
+        {
+            for (auto& span : line.second)
+            {
+                auto words = Split(span.second.str);
+
+                // for each word in words, if the word is longer than width, split the word into multiple spans
+                for (auto& word : words)
+                    wrapped.SetSpan(line.first, span.first + word.first, Span(word.second, span.second.appear));
+            }
+        }
+
+        return wrapped.SpanWrapped(width);
     }
 }
