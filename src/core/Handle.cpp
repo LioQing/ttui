@@ -214,7 +214,7 @@ namespace ttui
             bool is_last_empty = false;
             for (uint16_t x = 0; x < widget_width;)
             {
-                Span span = widget.GetSpan(y - offset, x, Rect(rect.x + offset, rect.y + y, widget_width, rect.height - offset * 2));
+                Span span = widget.GetSpan(y - offset, x, Rect(rect.x + offset, rect.y + offset, widget_width, rect.height - offset * 2));
 
                 if (x + span.str.size() > widget_width)
                     span.str = span.str.substr(0, widget_width - x);

@@ -6,6 +6,22 @@ namespace ttui
     {
     }
 
+    Paragraph::Paragraph(const std::string& str, const Appearance& appear)
+    {
+        SetSpan(0, 0, Span(str, appear));
+    }
+
+    void Paragraph::SetAppearance(const Appearance& appear)
+    {
+        for (auto& l : map)
+        {
+            for (auto& s : l.second)
+            {
+                s.second.appear = appear;
+            }
+        }
+    }
+
     bool Paragraph::HasLine(uint16_t line_no) const
     {
         return GetMap().find(line_no) != GetMap().end();
@@ -226,19 +242,39 @@ namespace ttui
         return map.rbegin()->first - map.begin()->first + 1;
     }
 
+    void Paragraph::EraseEmptySpans()
+    {
+        // erase spans with empty str
+        for (auto line_itr = map.begin(); line_itr != map.end();)
+        {
+            for (auto itr = line_itr->second.begin(); itr != line_itr->second.end();)
+            {
+                auto copy_itr = itr++;
+                if (itr->second.str.empty())
+                    line_itr->second.erase(copy_itr);
+            }
+
+            auto copy_itr = line_itr++;
+            if (line_itr->second.empty())
+                map.erase(copy_itr);
+        }
+    }
+
     Paragraph Paragraph::Wrapped(Wrap wrap, uint16_t width) const
     {
         Paragraph wrapped;
 
-        if      (wrap == Wrap::Word) wrapped = WordWrapped(width);
-        else if (wrap == Wrap::Span) wrapped = SpanWrapped(width);
+        if      (wrap == Wrap::Word)                wrapped = WordWrapped(width, true);
+        if      (wrap == Wrap::WordWithoutSpace)    wrapped = WordWrapped(width, false);
+        else if (wrap == Wrap::Span)                wrapped = SpanWrapped(width);
 
         return wrapped;
     }
 
     Paragraph Paragraph::SpanWrapped(uint16_t width) const
     {
-        Map wrapped_map;
+        Paragraph wrapped_para;
+        Map& wrapped_map = wrapped_para.map;
 
         int32_t line_offset = 0;
         int32_t x_offset = 0;
@@ -258,12 +294,16 @@ namespace ttui
 
                 if (span.str.size() <= width && pos + span.str.size() > width)
                 {
-                    ++y_offset;
+                    auto add_y = 1;
+                    while (pos + (int32_t)span.str.size() > width * (add_y + 1))
+                        ++add_y;
+
+                    y_offset += add_y;
                     wrapped_map.emplace(line.first + line_offset + y_offset, std::map<uint16_t, Span>());
 
-                    if (pos < width)
+                    if (pos < width * add_y)
                     {
-                        x_offset += width - pos;
+                        x_offset += width * add_y - pos;
                     }
 
                     pos = itr->first + x_offset - y_offset * width;
@@ -279,14 +319,15 @@ namespace ttui
             line_offset += y_offset;
         }
 
-        return Paragraph(wrapped_map);
+        return wrapped_para;
     }
 
-    Paragraph Paragraph::WordWrapped(uint16_t width) const
+    Paragraph Paragraph::WordWrapped(uint16_t width, bool include_space) const
     {
-        Paragraph wrapped(map);
+        Paragraph wrapped_para(map);
+        Map& wrapped_map = wrapped_para.map;
 
-        auto Split = [](const std::string& str) -> std::map<uint16_t, std::string>
+        auto Split = [include_space](const std::string& str) -> std::map<uint16_t, std::string>
         {
             std::map<uint16_t, std::string> words;
 
@@ -295,7 +336,11 @@ namespace ttui
             {
                 if (*itr == ' ')
                 {
-                    words.emplace(last_itr - str.begin(), std::string(last_itr, itr));
+                    std::string word = std::string(last_itr, itr + include_space);
+                    if (!word.empty())
+                    {
+                        words.emplace(last_itr - str.begin(), word);
+                    }
                     last_itr = itr + 1;
                 }
             }
@@ -307,7 +352,7 @@ namespace ttui
         };
 
         // for each line in wrapped_word, for each span in line, split the span into words
-        for (auto& line : wrapped.map)
+        for (auto& line : wrapped_map)
         {
             for (auto& span : line.second)
             {
@@ -315,10 +360,10 @@ namespace ttui
 
                 // for each word in words, if the word is longer than width, split the word into multiple spans
                 for (auto& word : words)
-                    wrapped.SetSpan(line.first, span.first + word.first, Span(word.second, span.second.appear));
+                    wrapped_para.SetSpan(line.first, span.first + word.first, Span(word.second, span.second.appear));
             }
         }
 
-        return wrapped.SpanWrapped(width);
+        return wrapped_para.SpanWrapped(width);
     }
 }

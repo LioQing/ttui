@@ -3,7 +3,7 @@
 namespace ttui
 {
     Appearance::Appearance(const Color& fg_color, const Color& bg_color, uint8_t style)
-        : fg_color(fg_color), bg_color(bg_color), style(style), unchanged(false)
+        : fg_color(fg_color), bg_color(bg_color), style(style)
     {
     }
 

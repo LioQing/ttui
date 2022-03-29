@@ -4,17 +4,71 @@
 
 namespace ttui
 {
+    Text::Text(const Paragraph& paragraph, Border border, Wrap wrap)
+        : paragraph(paragraph), border(border), wrap(wrap)
+    {
+    }
+
+    void Text::SetParagraph(const Paragraph& paragraph)
+    {
+        this->paragraph = paragraph;
+        updated = true;
+    }
+
+    const Paragraph& Text::GetParagraph() const
+    {
+        return paragraph;
+    }
+
+    void Text::SetBorder(const Border& border)
+    {
+        this->border = border;
+    }
+
+    void Text::SetHorizAlign(Align align)
+    {
+        horiz_align = align;
+        updated = true;
+    }
+
+    Align Text::GetHorizAlign() const
+    {
+        return horiz_align;
+    }
+
+    void Text::SetVertAlign(Align align)
+    {
+        vert_align = align;
+        updated = true;
+    }
+
+    Align Text::GetVertAlign() const
+    {
+        return vert_align;
+    }
+
+    void Text::SetWrap(Wrap wrap)
+    {
+        this->wrap = wrap;
+        updated = true;
+    }
+
+    Wrap Text::GetWrap() const
+    {
+        return wrap;
+    }
+
     Span Text::GetSpan(uint16_t y, uint16_t x, const Rect& rect) const
     {
         // wrap
         const Paragraph* para = &paragraph;
         if (wrap != Wrap::None)
         {
-            if (wrap != prev_wrap || rect != prev_rect)
+            if (updated || rect != prev_rect)
             {
                 wrapped_para = paragraph.Wrapped(wrap, rect.width);
-                prev_wrap = wrap;
                 prev_rect = rect;
+                updated = false;
             }
             para = &wrapped_para;
         }

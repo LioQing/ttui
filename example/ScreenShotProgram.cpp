@@ -49,15 +49,19 @@ int main()
         });
 
         // text widget
-        ttui::Text my_text;
-        my_text.border = ttui::Border::Single("Typing Test");
-        my_text.horiz_align = ttui::Align::Center;
-        my_text.wrap = ttui::Wrap::Word;
+        ttui::Text my_text_widget;
+        my_text_widget.SetBorder(ttui::Border::Single("Typing Test"));
+        my_text_widget.SetHorizAlign(ttui::Align::Center);
+        my_text_widget.SetWrap(ttui::Wrap::Word);
 
-        my_text.paragraph.AddSpan(0, 0, ttui::Span("Type something:"));
-        my_text.paragraph.AddSpan(1, 0, ttui::Span("", ttui::Appearance(ttui::Color::BrightYellow())));
+        ttui::Paragraph paragraph;
 
-        layout.SetWidget(0, my_text);
+        paragraph.AddSpan(0, 0, ttui::Span("Type something:"));
+        paragraph.AddSpan(1, 0, ttui::Span("", ttui::Appearance(ttui::Color::BrightYellow())));
+
+        my_text_widget.SetParagraph(paragraph);
+
+        layout.SetWidget(0, my_text_widget);
 
         // inner layout
         ttui::Layout inner_layout;
@@ -69,20 +73,42 @@ int main()
 
         inner_layout.SetWidget(0, MyWidget());
 
-        inner_layout.SetWidget(1, ttui::Empty(ttui::Border::Single()));
+        // list widget
+        ttui::List list;
+        list.SetBorder(ttui::Border::Single("List (up/down keys)"));
+        list.SetWrap(ttui::Wrap::Word);
+        list.SetEnableAutoAppearance(true);
+
+        list.SetItems(
+        {
+            ttui::Paragraph("Item 1", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Red())),
+            ttui::Paragraph("Item 2", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Yellow())),
+            ttui::Paragraph("Item 3", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Green())),
+            ttui::Paragraph("Item 4 - Long Long Item Name Hey This is Very Long Right Now", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Blue())),
+            ttui::Paragraph("Item 5", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Magenta())),
+            ttui::Paragraph("Item 6 - Long Space in Between         Item", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Cyan())),
+            ttui::Paragraph("Item 7", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+        });
+
+        inner_layout.SetWidget(1, list);
 
         layout.SetWidget(1, std::move(inner_layout));
     }
 
-    ttui::Paragraph& my_text_para = ((ttui::Text&)layout.GetWidget(0)).paragraph;
+    ttui::Text& my_text = (ttui::Text&)layout.GetWidget(0);
+    ttui::List& my_list = (ttui::List&)((ttui::Layout&)layout.GetWidget(1)).GetWidget(1);
+
     auto typing_cursor = 1;
 
     // main loop
     bool is_running = true;
+    handle.Render(layout);
+    handle.Draw();
     while (is_running)
     {
         // poll events
         ttui::Event event;
+        bool has_event = false;
         while (handle.PollEvent(event))
         {
             if (event.type == ttui::Event::Exit)
@@ -92,23 +118,29 @@ int main()
             }
             else if (event.type == ttui::Event::Resize)
             {
-                std::cout << tcon::SetClearScreen() << std::endl;
+                ttui::screen::Clear();
             }
-            else if (event.type == ttui::Event::Input)
+            else if (event.type == ttui::Event::Input) // typing
             {
                 if (!event.input.is_esc)
                 {
                     if (isprint(event.input.code) || event.input.code == '\n')
                     {
+                        auto my_text_para = my_text.GetParagraph();
                         auto span = my_text_para.GetSpan(typing_cursor, 0);
+
                         span.str.push_back(event.input.code);
                         my_text_para.SetSpan(typing_cursor, 0, span);
                         if (event.input.code == '\n')
                             ++typing_cursor;
+                        
+                        my_text.SetParagraph(my_text_para);
                     }
                     else if (event.input.code == ttui::InputEvent::Backspace)
                     {
+                        auto my_text_para = my_text.GetParagraph();
                         auto span = my_text_para.GetSpan(typing_cursor, 0);
+
                         if (!span.str.empty())
                         {
                             span.str.pop_back();
@@ -118,15 +150,33 @@ int main()
                         {
                             --typing_cursor;
                         }
+
+                        my_text.SetParagraph(my_text_para);
                     }
                 }
+                else if (event.input.code == ttui::InputEvent::Up) // list navigation
+                {
+                    auto idx = my_list.GetSelectedItemIndex();
+                    if (idx != 0)
+                        my_list.SetSelectedItemIndex(idx - 1);
+                }
+                else if (event.input.code == ttui::InputEvent::Down) // list navigation
+                {
+                    auto idx = my_list.GetSelectedItemIndex();
+                    if (idx != my_list.GetSize() - 1)
+                        my_list.SetSelectedItemIndex(idx + 1);
+                }
             }
+
+            has_event = true;
         }
 
         // render
-        handle.Render(layout);
-
-        handle.Draw();
+        if (has_event)
+        {
+            handle.Render(layout);
+            handle.Draw();
+        }
 
         // sleep
         std::this_thread::sleep_for(std::chrono::milliseconds(15));

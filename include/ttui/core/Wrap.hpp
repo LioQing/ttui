@@ -6,6 +6,7 @@ namespace ttui
     {
         None,
         Word,
+        WordWithoutSpace,
         Span,
     };
 }

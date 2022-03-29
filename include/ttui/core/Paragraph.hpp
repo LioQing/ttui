@@ -17,6 +17,9 @@ namespace ttui
         Paragraph(const Paragraph&) = default;
 
         Paragraph(const Map& map);
+        Paragraph(const std::string& str, const Appearance& appear);
+
+        void SetAppearance(const Appearance& appear);
 
         bool HasLine(uint16_t line_no) const;
         bool AddLine(uint16_t line_no);
@@ -41,12 +44,13 @@ namespace ttui
         const Map& GetMap() const;
         uint16_t GetHeight() const;
 
+        void EraseEmptySpans();
         Paragraph Wrapped(Wrap wrap, uint16_t width) const;
 
     private:
 
         Paragraph SpanWrapped(uint16_t width) const;
-        Paragraph WordWrapped(uint16_t width) const;
+        Paragraph WordWrapped(uint16_t width, bool exclude_space) const;
 
         Map map;
     };
