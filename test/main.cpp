@@ -104,13 +104,13 @@ int main()
             ttui::Paragraph("Item 20", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
         });
 
-        inner_layout.SetWidget(1, list);
+        inner_layout.SetWidget(1, ttui::Empty(ttui::Border::None(), ttui::Color::Blue()));
 
         layout.SetWidget(1, std::move(inner_layout));
     }
 
     ttui::Text& my_text = (ttui::Text&)layout.GetWidget(0);
-    ttui::List& my_list = (ttui::List&)((ttui::Layout&)layout.GetWidget(1)).GetWidget(1);
+    //ttui::List& my_list = (ttui::List&)((ttui::Layout&)layout.GetWidget(1)).GetWidget(1);
 
     auto typing_cursor = 1;
 
@@ -168,18 +168,18 @@ int main()
                         my_text.SetParagraph(my_text_para);
                     }
                 }
-                else if (event.key.code == ttui::KeyEvent::Up) // list navigation
-                {
-                    auto idx = my_list.GetSelectedItemIndex();
-                    if (idx != 0)
-                        my_list.SetSelectedItemIndex(idx - 1);
-                }
-                else if (event.key.code == ttui::KeyEvent::Down) // list navigation
-                {
-                    auto idx = my_list.GetSelectedItemIndex();
-                    if (idx != my_list.GetSize() - 1)
-                        my_list.SetSelectedItemIndex(idx + 1);
-                }
+                // else if (event.key.code == ttui::KeyEvent::Up) // list navigation
+                // {
+                //     auto idx = my_list.GetSelectedItemIndex();
+                //     if (idx != 0)
+                //         my_list.SetSelectedItemIndex(idx - 1);
+                // }
+                // else if (event.key.code == ttui::KeyEvent::Down) // list navigation
+                // {
+                //     auto idx = my_list.GetSelectedItemIndex();
+                //     if (idx != my_list.GetSize() - 1)
+                //         my_list.SetSelectedItemIndex(idx + 1);
+                // }
             }
 
             has_event = true;
