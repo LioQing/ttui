@@ -120,23 +120,23 @@ int main()
             {
                 ttui::screen::Clear();
             }
-            else if (event.type == ttui::Event::Input) // typing
+            else if (event.type == ttui::Event::Key) // typing
             {
-                if (!event.input.is_esc)
+                if (!event.key.is_esc)
                 {
-                    if (isprint(event.input.code) || event.input.code == '\n')
+                    if (isprint(event.key.code) || event.key.code == '\n')
                     {
                         auto my_text_para = my_text.GetParagraph();
                         auto span = my_text_para.GetSpan(typing_cursor, 0);
 
-                        span.str.push_back(event.input.code);
+                        span.str.push_back(event.key.code);
                         my_text_para.SetSpan(typing_cursor, 0, span);
-                        if (event.input.code == '\n')
+                        if (event.key.code == '\n')
                             ++typing_cursor;
                         
                         my_text.SetParagraph(my_text_para);
                     }
-                    else if (event.input.code == ttui::InputEvent::Backspace)
+                    else if (event.key.code == ttui::KeyEvent::Backspace)
                     {
                         auto my_text_para = my_text.GetParagraph();
                         auto span = my_text_para.GetSpan(typing_cursor, 0);
@@ -154,13 +154,13 @@ int main()
                         my_text.SetParagraph(my_text_para);
                     }
                 }
-                else if (event.input.code == ttui::InputEvent::Up) // list navigation
+                else if (event.key.code == ttui::KeyEvent::Up) // list navigation
                 {
                     auto idx = my_list.GetSelectedItemIndex();
                     if (idx != 0)
                         my_list.SetSelectedItemIndex(idx - 1);
                 }
-                else if (event.input.code == ttui::InputEvent::Down) // list navigation
+                else if (event.key.code == ttui::KeyEvent::Down) // list navigation
                 {
                     auto idx = my_list.GetSelectedItemIndex();
                     if (idx != my_list.GetSize() - 1)

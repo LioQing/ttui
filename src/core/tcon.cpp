@@ -23,7 +23,7 @@ namespace tcon
 
         bool GetInputBuf(std::string& buf);
 
-        int32_t MapEscSeqToInputCode(const char* esc_seq, int32_t size, uint8_t& code, bool& is_alt);
+        int32_t InputEventHandle(const char* esc_seq, int32_t size, Event& event);
     }
 
     bool Handle::initialized = false;
@@ -158,41 +158,23 @@ namespace tcon
         {
             if (buf.at(i) == ESC)
             {
-                uint8_t code;
-                bool is_alt;
-                int seq_len = MapEscSeqToInputCode(buf.c_str() + i, buf.size() - i, code, is_alt);
+                Event event;
+                int seq_len = InputEventHandle(buf.c_str() + i, buf.size() - i, event);
                 
                 if (seq_len == 0)
                     continue;
 
-                if (seq_len == 1)
-                {
-                    Event event;
-                    event.type = Event::Input;
-                    event.input.code = InputEvent::Escape;
-                    event.input.is_esc = false;
-                    event.input.is_alt = false;
-                    event_queue.emplace_back(event);
-
-                    continue;
-                }
-
                 i += seq_len - 1;
 
-                Event event;
-                event.type = Event::Input;
-                event.input.code = code;
-                event.input.is_esc = !is_alt;
-                event.input.is_alt = is_alt;
                 event_queue.emplace_back(event);
             }
             else
             {
                 Event event;
-                event.type = Event::Input;
-                event.input.code = (uint8_t)buf.at(i);
-                event.input.is_esc = false;
-                event.input.is_alt = false;
+                event.type = Event::Key;
+                event.key.code = (uint8_t)buf.at(i);
+                event.key.is_esc = false;
+                event.key.is_alt = false;
                 event_queue.emplace_back(event);
             }
         }
@@ -216,7 +198,7 @@ namespace tcon
 
     std::string SetCursorPos(uint16_t x, uint16_t y)
     {
-        return std::string(1, ESC) + "[" + std::to_string(y) + ";" + std::to_string(x) + "f";
+        return std::string(1, ESC) + "[" + std::to_string(y + 1) + ";" + std::to_string(x + 1) + "f";
     }
 
     std::string SetAppearance(const std::vector<std::string>& vec)
@@ -302,6 +284,16 @@ namespace tcon
         return std::string(1, ESC) + "[?25h";
     }
 
+    std::string SetEnableMouseTracking()
+    {
+        return std::string(1, ESC) + "[?1000;1006;1015h";
+    }
+
+    std::string SetDisableMouseTracking()
+    {
+        return std::string(1, ESC) + "[?1000;1006;1015l";
+    }
+
     namespace
     {
         void SAHandler(int32_t signal)
@@ -353,75 +345,117 @@ namespace tcon
             return true;
         }
 
-        int32_t MapEscSeqToInputCode(const char* esc_seq, int32_t size, uint8_t& code, bool& is_alt)
+        int32_t InputEventHandle(const char* esc_seq, int32_t size, Event& event)
         {
             if (size < 1 || esc_seq[0] != ESC)
                 return 0;
 
-            is_alt = false;
-            
+            event.type = Event::Key;
+
             if (size < 2)
+            {
+                event.key.code = KeyEvent::Escape;
+                event.key.is_esc = false;
+                event.key.is_alt = false;
                 return 1;
+            }
             
+            event.key.is_alt = false;
+            event.key.is_esc = true;
+
             if (size > 2)
             {
                 if (esc_seq[1] == '1' || esc_seq[1] == 'O')
                 {
-                    if      (esc_seq[2] == 'P') { code = InputEvent::F1; return 3; }
-                    else if (esc_seq[2] == 'Q') { code = InputEvent::F2; return 3; }
-                    else if (esc_seq[2] == 'R') { code = InputEvent::F3; return 3; }
-                    else if (esc_seq[2] == 'S') { code = InputEvent::F4; return 3; }
+                    if      (esc_seq[2] == 'P') { event.key.code = KeyEvent::F1; return 3; }
+                    else if (esc_seq[2] == 'Q') { event.key.code = KeyEvent::F2; return 3; }
+                    else if (esc_seq[2] == 'R') { event.key.code = KeyEvent::F3; return 3; }
+                    else if (esc_seq[2] == 'S') { event.key.code = KeyEvent::F4; return 3; }
                 }
                 else if (esc_seq[1] == '[')
                 {
+                    // mouse event
+                    {
+                        int x, y;
+                        int action;
+                        char postfix;
+                        int char_read;
+                        if (sscanf(esc_seq + 2, "<%d;%d;%d%[Mm]%n", &action, &x, &y, &postfix, &char_read) == 4)
+                        {
+                            if (action == 0 || action == 1 || action == 2)
+                            {
+                                event.type = Event::MouseButton;
+                                event.mouse_button.x = x;
+                                event.mouse_button.y = y;
+                                event.mouse_button.is_down = postfix == 'M';
+
+                                if      (action == 0) { event.mouse_button.button = MouseButtonEvent::Left;   return char_read + 2; }
+                                else if (action == 1) { event.mouse_button.button = MouseButtonEvent::Middle; return char_read + 2; }
+                                else if (action == 2) { event.mouse_button.button = MouseButtonEvent::Right;  return char_read + 2; }
+                            }
+                            else if (action == 64 || action == 65)
+                            {
+                                event.type = Event::MouseWheel;
+                                event.mouse_wheel.x = x;
+                                event.mouse_wheel.y = y;
+                                event.mouse_wheel.delta = action == 64 ? 1 : -1;
+                                return char_read + 2;
+                            }
+                        }
+                    }
+
                     if (size > 3)
                     {
                         if (esc_seq[3] == '~')
                         {
-                            if      (esc_seq[2] == '1')     { code = InputEvent::Home;      return 4; }
-                            else if (esc_seq[2] == '2')     { code = InputEvent::Insert;    return 4; }
-                            else if (esc_seq[2] == '3')     { code = InputEvent::Delete;    return 4; }
-                            else if (esc_seq[2] == '4')     { code = InputEvent::End;       return 4; }
-                            else if (esc_seq[2] == '5')     { code = InputEvent::PgUp;      return 4; }
-                            else if (esc_seq[2] == '6')     { code = InputEvent::PgDown;    return 4; }
-                            else if (esc_seq[2] == '7')     { code = InputEvent::Home;      return 4; }
-                            else if (esc_seq[2] == '8')     { code = InputEvent::End;       return 4; }
+                            if      (esc_seq[2] == '1')     { event.key.code = KeyEvent::Home;      return 4; }
+                            else if (esc_seq[2] == '2')     { event.key.code = KeyEvent::Insert;    return 4; }
+                            else if (esc_seq[2] == '3')     { event.key.code = KeyEvent::Delete;    return 4; }
+                            else if (esc_seq[2] == '4')     { event.key.code = KeyEvent::End;       return 4; }
+                            else if (esc_seq[2] == '5')     { event.key.code = KeyEvent::PgUp;      return 4; }
+                            else if (esc_seq[2] == '6')     { event.key.code = KeyEvent::PgDown;    return 4; }
+                            else if (esc_seq[2] == '7')     { event.key.code = KeyEvent::Home;      return 4; }
+                            else if (esc_seq[2] == '8')     { event.key.code = KeyEvent::End;       return 4; }
                         }
                         
                         if (size > 4 && esc_seq[4] == '~')
                         {
-                            if      (esc_seq[2] == '1' && esc_seq[3] == '0')    { code = InputEvent::F0;        return 5; }
-                            else if (esc_seq[2] == '1' && esc_seq[3] == '1')    { code = InputEvent::F1;        return 5; }
-                            else if (esc_seq[2] == '1' && esc_seq[3] == '2')    { code = InputEvent::F2;        return 5; }
-                            else if (esc_seq[2] == '1' && esc_seq[3] == '3')    { code = InputEvent::F3;        return 5; }
-                            else if (esc_seq[2] == '1' && esc_seq[3] == '4')    { code = InputEvent::F4;        return 5; }
-                            else if (esc_seq[2] == '1' && esc_seq[3] == '5')    { code = InputEvent::F5;        return 5; }
-                            else if (esc_seq[2] == '1' && esc_seq[3] == '7')    { code = InputEvent::F6;        return 5; }
-                            else if (esc_seq[2] == '1' && esc_seq[3] == '8')    { code = InputEvent::F7;        return 5; }
-                            else if (esc_seq[2] == '1' && esc_seq[3] == '9')    { code = InputEvent::F8;        return 5; }
-                            else if (esc_seq[2] == '2' && esc_seq[3] == '0')    { code = InputEvent::F9;        return 5; }
-                            else if (esc_seq[2] == '2' && esc_seq[3] == '1')    { code = InputEvent::F10;       return 5; }
-                            else if (esc_seq[2] == '2' && esc_seq[3] == '3')    { code = InputEvent::F11;       return 5; }
-                            else if (esc_seq[2] == '2' && esc_seq[3] == '4')    { code = InputEvent::F12;       return 5; }
+                            if      (esc_seq[2] == '1' && esc_seq[3] == '0') { event.key.code = KeyEvent::F0;        return 5; }
+                            else if (esc_seq[2] == '1' && esc_seq[3] == '1') { event.key.code = KeyEvent::F1;        return 5; }
+                            else if (esc_seq[2] == '1' && esc_seq[3] == '2') { event.key.code = KeyEvent::F2;        return 5; }
+                            else if (esc_seq[2] == '1' && esc_seq[3] == '3') { event.key.code = KeyEvent::F3;        return 5; }
+                            else if (esc_seq[2] == '1' && esc_seq[3] == '4') { event.key.code = KeyEvent::F4;        return 5; }
+                            else if (esc_seq[2] == '1' && esc_seq[3] == '5') { event.key.code = KeyEvent::F5;        return 5; }
+                            else if (esc_seq[2] == '1' && esc_seq[3] == '7') { event.key.code = KeyEvent::F6;        return 5; }
+                            else if (esc_seq[2] == '1' && esc_seq[3] == '8') { event.key.code = KeyEvent::F7;        return 5; }
+                            else if (esc_seq[2] == '1' && esc_seq[3] == '9') { event.key.code = KeyEvent::F8;        return 5; }
+                            else if (esc_seq[2] == '2' && esc_seq[3] == '0') { event.key.code = KeyEvent::F9;        return 5; }
+                            else if (esc_seq[2] == '2' && esc_seq[3] == '1') { event.key.code = KeyEvent::F10;       return 5; }
+                            else if (esc_seq[2] == '2' && esc_seq[3] == '3') { event.key.code = KeyEvent::F11;       return 5; }
+                            else if (esc_seq[2] == '2' && esc_seq[3] == '4') { event.key.code = KeyEvent::F12;       return 5; }
                         }
                     }
 
-                    if      (esc_seq[2] == 'A') { code = InputEvent::Up;    return 3; }
-                    else if (esc_seq[2] == 'B') { code = InputEvent::Down;  return 3; }
-                    else if (esc_seq[2] == 'C') { code = InputEvent::Right; return 3; }
-                    else if (esc_seq[2] == 'D') { code = InputEvent::Left;  return 3; }
-                    else if (esc_seq[2] == 'F') { code = InputEvent::End;   return 3; }
-                    else if (esc_seq[2] == 'H') { code = InputEvent::Home;  return 3; }
+                    if      (esc_seq[2] == 'A') { event.key.code = KeyEvent::Up;    return 3; }
+                    else if (esc_seq[2] == 'B') { event.key.code = KeyEvent::Down;  return 3; }
+                    else if (esc_seq[2] == 'C') { event.key.code = KeyEvent::Right; return 3; }
+                    else if (esc_seq[2] == 'D') { event.key.code = KeyEvent::Left;  return 3; }
+                    else if (esc_seq[2] == 'F') { event.key.code = KeyEvent::End;   return 3; }
+                    else if (esc_seq[2] == 'H') { event.key.code = KeyEvent::Home;  return 3; }
                 }
             }
             
             if (isprint(esc_seq[1]))
             {
-                is_alt = true;
-                code = esc_seq[1];
+                event.key.is_alt = true;
+                event.key.is_esc = false;
+                event.key.code = esc_seq[1];
                 return 2;
             }
 
+            event.key.code = KeyEvent::Escape;
+            event.key.is_esc = false;
+            event.key.is_alt = false;
             return 1;
         }
     }

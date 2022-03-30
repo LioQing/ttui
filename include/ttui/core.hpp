@@ -21,7 +21,9 @@
 
 namespace ttui
 {
-    using tcon::InputEvent;
+    using tcon::KeyEvent;
+    using tcon::MouseButtonEvent;
+    using tcon::MouseWheelEvent;
     using tcon::ResizeEvent;
     using tcon::Event;
 }

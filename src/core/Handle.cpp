@@ -103,7 +103,7 @@ namespace ttui
 
     void Handle::Render(const Widget& widget)
     {
-        Render(widget, Rect(1, 1, GetWidth(), GetHeight()));
+        Render(widget, Rect(0, 0, GetWidth(), GetHeight()));
     }
 
     void Handle::Draw()

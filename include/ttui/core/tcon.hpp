@@ -11,10 +11,40 @@
 namespace tcon
 {
     /**
-     * @brief A structure containing input event information.
+     * @brief A structure containing mouse button input event information.
      * 
      */
-    struct InputEvent
+    struct MouseButtonEvent
+    {
+        enum : uint8_t
+        {
+            Left,
+            Middle,
+            Right,
+        };
+
+        uint8_t button;
+        uint16_t x;
+        uint16_t y;
+        bool is_down; // true if the action is press, false if the action is release
+    };
+
+    /**
+     * @brief A structure containing mouse wheel input event information.
+     * 
+     */
+    struct MouseWheelEvent
+    {
+        int16_t delta;
+        uint16_t x;
+        uint16_t y;
+    };
+
+    /**
+     * @brief A structure containing key input event information.
+     * 
+     */
+    struct KeyEvent
     {
         enum : uint8_t
         {
@@ -56,15 +86,17 @@ namespace tcon
     {
         enum Type
         {
-            Exit, Resize, Input,
+            Exit, Resize, Key, MouseButton, MouseWheel,
         };
 
         Type type;
 
         union
         {
-            InputEvent input;
+            KeyEvent key;
             ResizeEvent resize;
+            MouseButtonEvent mouse_button;
+            MouseWheelEvent mouse_wheel;
         };
     };
 
@@ -298,4 +330,18 @@ namespace tcon
      * @return std::string The escape sequence
      */
     std::string SetShowCursor();
+
+    /**
+     * @brief Enable mouse input events.
+     * 
+     * @return std::string The escape sequence
+     */
+    std::string SetEnableMouseTracking();
+
+    /**
+     * @brief Disable mouse input events.
+     * 
+     * @return std::string The escape sequence
+     */
+    std::string SetDisableMouseTracking();
 }
