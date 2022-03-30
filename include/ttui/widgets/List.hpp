@@ -36,6 +36,9 @@ namespace ttui
         void SetWrap(Wrap wrap);
         Wrap GetWrap() const;
 
+        void SetScrollHeight(uint16_t height);
+        uint16_t GetScrollHeight() const;
+
         /**
          * @brief Enable or disable the filling of the background of whole line with that of the last span.
          * 
@@ -104,14 +107,18 @@ namespace ttui
         Align horiz_align = Align::Left;
         Wrap wrap = Wrap::None;
 
+        mutable uint16_t scroll_height = 0;
+        bool auto_scroll = true;
+
         bool fill_span_bg_color = true;
 
         bool enable_auto_appear = false;
-        size_t selected_item_index = 0;
+        size_t selected_item_idx = 0;
         Appearance auto_appear_unselected;
         Appearance auto_appear_selected = Appearance(Color::White(), Color::BrightBlack());
 
         mutable bool updated = true;
+        mutable bool selected_item_updated = true;
         mutable Rect prev_rect = Rect();
         mutable std::vector<Paragraph> wrapped_items;
 

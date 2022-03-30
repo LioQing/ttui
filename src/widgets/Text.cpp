@@ -58,8 +58,21 @@ namespace ttui
         return wrap;
     }
 
+    void Text::SetScrollHeight(uint16_t height)
+    {
+        scroll_height = height;
+    }
+
+    uint16_t Text::GetScrollHeight() const
+    {
+        return scroll_height;
+    }
+
     Span Text::GetSpan(uint16_t y, uint16_t x, const Rect& rect) const
     {
+        // scroll
+        y += scroll_height;
+
         // wrap
         const Paragraph* para = &paragraph;
         if (wrap != Wrap::None)

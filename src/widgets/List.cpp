@@ -1,6 +1,7 @@
 #include <ttui/widgets/List.hpp>
 
 #include <algorithm>
+#include <stdexcept>
 
 namespace ttui
 {
@@ -69,6 +70,17 @@ namespace ttui
         return wrap;
     }
 
+    void List::SetScrollHeight(uint16_t height)
+    {
+        scroll_height = height;
+        selected_item_updated = true;
+    }
+
+    uint16_t List::GetScrollHeight() const
+    {
+        return scroll_height;
+    }
+
     void List::SetFillSpanBackgroundColor(bool enabled)
     {
         fill_span_bg_color = enabled;
@@ -81,12 +93,16 @@ namespace ttui
 
     void List::SetSelectedItemIndex(size_t item_index)
     {
-        selected_item_index = item_index;
+        if (item_index >= items.size())
+            throw std::out_of_range("item_index");
+        
+        selected_item_idx = item_index;
+        selected_item_updated = true;
     }
 
     size_t List::GetSelectedItemIndex() const
     {
-        return selected_item_index;
+        return selected_item_idx;
     }
 
     void List::SetEnableAutoAppearance(bool enabled)
@@ -138,6 +154,7 @@ namespace ttui
                 // update prevs
                 prev_rect = rect;
                 updated = false;
+                selected_item_updated = true;
             }
 
             items_ptr = &wrapped_items;
@@ -153,7 +170,28 @@ namespace ttui
                 else
                     y_item_idx.push_back(y_item_idx.back() + items.at(i - 1).GetHeight());
             }
+
+            prev_rect = rect;
+            updated = false;
+            selected_item_updated = true;
         }
+
+        // scroll
+        if (auto_scroll && selected_item_updated)
+        {
+            const auto& item = items_ptr->at(selected_item_idx);
+            auto item_y = y_item_idx.at(selected_item_idx);
+            auto item_height = item.GetHeight();
+
+            if (item_y < y + scroll_height)
+                scroll_height -= y + scroll_height - item_y;
+            else if (y + scroll_height + rect.height < item_y + item_height)
+                scroll_height += item_y + item_height - (y + scroll_height + rect.height);
+
+            selected_item_updated = false;
+        }
+
+        y += scroll_height;
 
         if (items_ptr->empty())
             return Span();
@@ -181,7 +219,7 @@ namespace ttui
             {
                 if (enable_auto_appear)
                 {
-                    if (selected_item_index == item_idx)
+                    if (selected_item_idx == item_idx)
                         return Span(" ", auto_appear_selected);
                     else
                         return Span(" ", auto_appear_unselected);
@@ -205,7 +243,7 @@ namespace ttui
 
         if (enable_auto_appear)
         {
-            if (selected_item_index == item_idx)
+            if (selected_item_idx == item_idx)
                 return Span(span_itr->second.str, auto_appear_selected);
             else
                 return Span(span_itr->second.str, auto_appear_unselected);

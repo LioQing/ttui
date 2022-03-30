@@ -89,6 +89,19 @@ int main()
             ttui::Paragraph("Item 5", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Magenta())),
             ttui::Paragraph("Item 6 - Long Space in Between         Item", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Cyan())),
             ttui::Paragraph("Item 7", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 8", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 9", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 10", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 11", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 12", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 13", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 14", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 15", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 16", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 17", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 18", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 19", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
+            ttui::Paragraph("Item 20", ttui::Appearance(ttui::Color::Reset(), ttui::Color::Black())),
         });
 
         inner_layout.SetWidget(1, list);

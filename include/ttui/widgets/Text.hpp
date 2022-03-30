@@ -37,6 +37,9 @@ namespace ttui
 
         void SetWrap(Wrap wrap);
         Wrap GetWrap() const;
+
+        void SetScrollHeight(uint16_t height);
+        uint16_t GetScrollHeight() const;
         
         Span GetSpan(uint16_t y, uint16_t x, const Rect& rect) const override;
         Border GetBorder() const override;
@@ -48,6 +51,8 @@ namespace ttui
         Align vert_align = Align::Top;
         Align horiz_align = Align::Left;
         Wrap wrap = Wrap::None;
+
+        uint16_t scroll_height = 0;
 
         mutable bool updated = true;
         mutable Rect prev_rect = Rect();
