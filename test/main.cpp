@@ -37,6 +37,7 @@ int main()
     handle.Init();
 
     ttui::cursor::SetVisible(false);
+    ttui::mouse::EnableEvent(true);
 
     // layout and widgets
     ttui::Layout layout;
@@ -184,6 +185,7 @@ int main()
 
     // clean up
     ttui::cursor::SetVisible(true);
+    ttui::mouse::EnableEvent(false);
     ttui::screen::Clear();
 
     return 0;

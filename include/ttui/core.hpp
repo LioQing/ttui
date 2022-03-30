@@ -18,6 +18,7 @@
 #include <ttui/core/Wrap.hpp>
 #include <ttui/core/cursor.hpp>
 #include <ttui/core/screen.hpp>
+#include <ttui/core/mouse.hpp>
 
 namespace ttui
 {
