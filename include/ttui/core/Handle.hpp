@@ -45,7 +45,7 @@ namespace ttui
 
         void HiddenRender(const Widget& widget, const Rect& rect);
         
-        std::map<uint16_t, Rect> drawn_rects;
+        std::multimap<uint16_t, Rect> drawn_rects;
         std::deque<std::function<void()>> pps;
         bool in_render = false;
     };
