@@ -38,6 +38,9 @@ namespace ttui
         void SetWrap(Wrap wrap);
         Wrap GetWrap() const;
 
+        void SetBackgroundColor(const Color& color);
+        const Color& GetBackgroundColor() const;
+
         void SetScrollHeight(uint16_t height);
         uint16_t GetScrollHeight() const;
         
@@ -51,6 +54,7 @@ namespace ttui
         Align vert_align = Align::Top;
         Align horiz_align = Align::Left;
         Wrap wrap = Wrap::None;
+        Color bg_color = Color::Reset();
 
         uint16_t scroll_height = 0;
 

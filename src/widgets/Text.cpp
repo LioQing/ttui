@@ -58,6 +58,16 @@ namespace ttui
         return wrap;
     }
 
+    void Text::SetBackgroundColor(const Color& color)
+    {
+        bg_color = color;
+    }
+
+    const Color& Text::GetBackgroundColor() const
+    {
+        return bg_color;
+    }
+
     void Text::SetScrollHeight(uint16_t height)
     {
         scroll_height = height;
@@ -99,10 +109,10 @@ namespace ttui
         }
         
         if (actual_y < 0)
-            return Span();
+            return Span(" ", ttui::Appearance(ttui::Color::Reset(), bg_color));
 
         if (!para->HasLine(actual_y))
-            return Span();
+            return Span(" ", ttui::Appearance(ttui::Color::Reset(), bg_color));
 
         // x align
         int32_t actual_x = x;
@@ -117,10 +127,10 @@ namespace ttui
         }
         
         if (actual_x < 0)
-            return Span();
+            return Span(" ", ttui::Appearance(ttui::Color::Reset(), bg_color));
 
         if (!para->HasSpan(actual_y, actual_x))
-            return Span();
+            return Span(" ", ttui::Appearance(ttui::Color::Reset(), bg_color));
         
         return para->GetSpan(actual_y, actual_x);
     }
