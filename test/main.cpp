@@ -77,8 +77,10 @@ int main()
         // list widget
         ttui::List list;
         list.SetBorder(ttui::Border::Single("List (up/down keys)"));
+        list.SetHorizAlign(ttui::Align::Right);
         list.SetWrap(ttui::Wrap::Word);
         list.SetEnableAutoAppearance(true);
+        // list.SetFillSpanBackgroundColor(false);
 
         list.SetItems(
         {

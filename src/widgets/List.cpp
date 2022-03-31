@@ -231,10 +231,38 @@ namespace ttui
             }
             return Span();
         }
-        
-        auto span_itr = std::prev(line_itr->second.upper_bound(x));
 
-        if (span_itr->first != x)
+        // x align
+        auto line_width = item.GetLineWidth(local_y);
+        int32_t actual_x = x;
+        if (rect.width > line_width)
+        {
+            if (horiz_align == Align::Center)
+                actual_x -= (rect.width - line_width) / 2;
+            else if (horiz_align == Align::Right)
+                actual_x -= rect.width - line_width;
+        }
+        
+        if (actual_x < 0)
+        {
+            if (fill_span_bg_color)
+            {
+                if (enable_auto_appear)
+                {
+                    if (selected_item_idx == item_idx)
+                        return Span(" ", auto_appear_selected);
+                    else
+                        return Span(" ", auto_appear_unselected);
+                }
+
+                return Span(" ", line_itr->second.begin()->second.appear);
+            }
+            return Span();
+        }
+        
+        auto span_itr = std::prev(line_itr->second.upper_bound(actual_x));
+
+        if (span_itr->first != actual_x)
         {
             if (fill_span_bg_color)
                 return Span(" ", Appearance::Unchanged());
