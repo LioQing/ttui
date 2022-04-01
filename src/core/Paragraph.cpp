@@ -178,14 +178,21 @@ namespace ttui
                 return std::string::npos;
             };
 
+            size_t s, e, i;
             for (
-                size_t s = span.str.size() - 1, e = rfindnl(s), i = count;
+                s = span.str.size(), e = rfindnl(s - 1), i = count;
                 e != std::string::npos;
-                s = e - 1, e = rfindnl(s), --i
+                s = e, e = rfindnl(s - 1), --i
                 )
             {
-                SetSpan(line_no + i, 0, Span(span.str.substr(e + 1, s - e), span.appear));
+                if (map.find(line_no + i) == map.end())
+                    map.emplace(line_no + i, std::map<uint16_t, Span>({ { 0, Span(span.str.substr(e + 1, s - e - 1), span.appear) } }));
+                else
+                    map.at(line_no + i) = { { 0, Span(span.str.substr(e + 1, s - e - 1), span.appear) } };
             }
+
+            if (s != 0)
+                map.at(line_no) = { { 0, Span(span.str.substr(0, s), span.appear) } };
 
             return;
         }

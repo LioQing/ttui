@@ -57,8 +57,9 @@ int main()
 
         ttui::Paragraph paragraph;
 
-        paragraph.AddSpan(0, 0, ttui::Span("Type something:"));
-        paragraph.AddSpan(1, 0, ttui::Span("", ttui::Appearance(ttui::Color::BrightYellow())));
+        paragraph.AddSpan(0, 0, ttui::Span("ab\ncd"));
+        paragraph.AddSpan(2, 0, ttui::Span("de\nfgh"));
+        paragraph.AddSpan(4, 0, ttui::Span("Init\n2nd", ttui::Appearance(ttui::Color::BrightYellow())));
 
         my_text_widget.SetParagraph(paragraph);
 
@@ -114,7 +115,7 @@ int main()
     ttui::Text& my_text = (ttui::Text&)layout.GetWidget(0);
     ttui::List& my_list = (ttui::List&)((ttui::Layout&)layout.GetWidget(1)).GetWidget(1);
 
-    auto typing_cursor = 1;
+    auto typing_cursor = 4;
 
     // main loop
     bool is_running = true;
