@@ -114,10 +114,7 @@ namespace ttui
                 actual_y -= rect.height - line_height;
         }
         
-        if (actual_y < 0)
-            return Span(" ", ttui::Appearance(ttui::Color::Reset(), bg_color));
-
-        if (!para->HasLine(actual_y))
+        if (actual_y < 0 || !para->HasLine(actual_y))
             return Span(" ", ttui::Appearance(ttui::Color::Reset(), bg_color));
 
         // x align
@@ -132,13 +129,15 @@ namespace ttui
                 actual_x -= rect.width - line_width;
         }
         
-        if (actual_x < 0)
+        if (actual_x < 0 || !para->HasSpan(actual_y, actual_x))
             return Span(" ", ttui::Appearance(ttui::Color::Reset(), bg_color));
 
-        if (!para->HasSpan(actual_y, actual_x))
+        const auto& span = para->GetSpan(actual_y, actual_x);
+
+        if (span.str.empty())
             return Span(" ", ttui::Appearance(ttui::Color::Reset(), bg_color));
         
-        return para->GetSpan(actual_y, actual_x);
+        return span;
     }
 
     Border Text::GetBorder() const

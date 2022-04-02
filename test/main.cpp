@@ -58,10 +58,11 @@ int main()
         ttui::Paragraph paragraph;
 
         paragraph.AddSpan(0, 0, ttui::Span("ab\ncd"));
-        paragraph.AddSpan(2, 0, ttui::Span("de\nfgh"));
+        paragraph.AddSpan(2, 0, ttui::Span("def\nghi"));
         paragraph.AddSpan(4, 0, ttui::Span("Init\n2nd", ttui::Appearance(ttui::Color::BrightYellow())));
 
         my_text_widget.SetParagraph(paragraph);
+        my_text_widget.SetBackgroundColor(ttui::Color::BrightBlack());
 
         layout.SetWidget(0, my_text_widget);
 

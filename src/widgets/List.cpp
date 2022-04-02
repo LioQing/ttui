@@ -268,7 +268,7 @@ namespace ttui
         
         auto span_itr = std::prev(line_itr->second.upper_bound(actual_x));
 
-        if (span_itr->first != actual_x)
+        if (span_itr->first != actual_x || span_itr->second.str.empty())
         {
             if (fill_span_bg_color)
                 return Span(" ", Appearance::Unchanged());
