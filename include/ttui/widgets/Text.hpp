@@ -43,6 +43,8 @@ namespace ttui
 
         void SetScrollHeight(uint16_t height);
         uint16_t GetScrollHeight() const;
+
+        const Paragraph& GetWrappedParagraph(uint16_t width) const;
         
         Span GetSpan(uint16_t y, uint16_t x, const Rect& rect) const override;
         Border GetBorder() const override;

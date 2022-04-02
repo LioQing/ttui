@@ -78,6 +78,12 @@ namespace ttui
         return scroll_height;
     }
 
+    const Paragraph& Text::GetWrappedParagraph(uint16_t width) const
+    {
+        GetSpan(0, 0, Rect(0, 0, width, 1));
+        return wrapped_para;
+    }
+
     Span Text::GetSpan(uint16_t y, uint16_t x, const Rect& rect) const
     {
         // scroll

@@ -97,6 +97,8 @@ namespace ttui
          */
         const Appearance& GetAutoAppearance(bool selected) const;
 
+        const std::vector<Paragraph>& GetWrappedItems(uint16_t width) const;
+
         Span GetSpan(uint16_t y, uint16_t x, const Rect& rect) const override;
         Border GetBorder() const override;
     

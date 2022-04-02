@@ -129,6 +129,12 @@ namespace ttui
             return auto_appear_unselected;
     }
 
+    const std::vector<Paragraph>& List::GetWrappedItems(uint16_t width) const
+    {
+        GetSpan(0, 0, Rect(0, 0, width, 1));
+        return wrapped_items;
+    }
+
     Span List::GetSpan(uint16_t y, uint16_t x, const Rect& rect) const
     {
         // wrap and update y position
