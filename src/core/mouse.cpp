@@ -6,6 +6,7 @@ namespace ttui { namespace mouse
 {
     void EnableEvent(bool enable)
     {
-        printf("%s\n", enable ? tcon::SetEnableMouseTracking().c_str() : tcon::SetDisableMouseTracking().c_str());
+        printf("%s", (enable ? tcon::SetEnableMouseTracking() : tcon::SetDisableMouseTracking()).c_str());
+        fflush(stdout);
     }
 }}

@@ -192,9 +192,12 @@ int main()
         // render
         if (has_event)
         {
+            ttui::cursor::SetVisible(false);
             handle.Render(layout, ttui::Rect(3, 3, handle.GetWidth() - 3, handle.GetHeight() - 3));
             handle.Render(ttui::Empty(ttui::Border::Single()), ttui::Rect(10, 10, handle.GetWidth() - 15, handle.GetHeight() - 15));
             handle.Draw();
+            ttui::cursor::SetPos(50, 1);
+            ttui::cursor::SetVisible(true);
         }
 
         // sleep

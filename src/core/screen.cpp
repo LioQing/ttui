@@ -14,6 +14,7 @@ namespace ttui { namespace screen
         else if (color.type == ttui::Color::Type::RGB)            color_code = tcon::SetAppearance({ tcon::Color24bit(color.rgb, tcon::Target::Background) });
         else if (color.type == ttui::Color::Type::Color8bit)      color_code = tcon::SetAppearance({ tcon::Color8bit(color.color_8bit, tcon::Target::Background) });
 
-        printf("%s\n", (color_code + tcon::SetClearScreen()).c_str());
+        printf("%s", (color_code + tcon::SetClearScreen()).c_str());
+        fflush(stdout);
     }
 }}

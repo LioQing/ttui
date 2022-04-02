@@ -38,8 +38,10 @@ namespace ttui
         /**
          * @brief Draw the rendered widgets.
          * 
+         * @param predraw_seq The escape sequence to be printed before drawing
+         * @param postdraw_seq The escape sequence to be printed after drawing
          */
-        void Draw();
+        void Draw(const std::string& predraw_seq = "", const std::string& postdraw_seq = "");
 
     private:
 

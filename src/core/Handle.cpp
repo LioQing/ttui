@@ -106,9 +106,9 @@ namespace ttui
         Render(widget, Rect(0, 0, GetWidth(), GetHeight()));
     }
 
-    void Handle::Draw()
+    void Handle::Draw(const std::string& predraw_seq, const std::string& postdraw_seq)
     {
-        printf("%s", buf.c_str());
+        printf("%s", (predraw_seq + buf + postdraw_seq).c_str());
         fflush(stdout);
 
         buf.clear();
