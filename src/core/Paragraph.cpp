@@ -1,5 +1,7 @@
 #include <ttui/core/Paragraph.hpp>
 
+#include <ttui/core/MBString.hpp>
+
 namespace ttui
 {
     Paragraph::Paragraph(const Map& map) : map(map)
@@ -47,7 +49,7 @@ namespace ttui
         for (const auto& s : spans)
         {
             AddSpan(line_no, next_x, s);
-            next_x = s.str.size();
+            next_x = MBString::Size(s.str);
         }
 
         return result.second;
@@ -99,7 +101,7 @@ namespace ttui
         if (map.at(line_no).empty())
             return 0;
         const auto& last = map.at(line_no).rbegin();
-        return last->first + last->second.str.size() - map.at(line_no).begin()->first;
+        return last->first + MBString::Size(last->second.str) - map.at(line_no).begin()->first;
     }
 
     bool Paragraph::HasSpan(uint16_t line_no, uint16_t x_coord) const
@@ -114,13 +116,13 @@ namespace ttui
         auto next_span = line.lower_bound(x_coord);
         auto next_dist = 0;
         if (next_span != line.end())
-            next_dist = next_span->first - x_coord - span.str.size();
+            next_dist = next_span->first - x_coord - MBString::Size(span.str);
 
         auto prev_dist = 0;
         if (next_span != line.begin())
         {
             auto prev_span = std::prev(next_span);
-            prev_dist = x_coord - prev_span->first - prev_span->second.str.size();
+            prev_dist = x_coord - prev_span->first - MBString::Size(prev_span->second.str);
         }
 
         return std::make_pair(prev_dist, next_dist);
@@ -210,14 +212,14 @@ namespace ttui
 
         if (dists.second < 0)
         {
-            in_span.str.resize(in_span.str.size() - dists.second);
+            MBString::Substr(in_span.str, 0, MBString::Size(in_span.str) - dists.second);
         }
 
         auto itr = map.at(line_no).find(x_coord);
         if (dists.first < 0 && itr != map.at(line_no).begin())
         {
             auto prev_span = std::prev(itr);
-            prev_span->second.str.resize(prev_span->second.str.size() - dists.first);
+            MBString::Substr(prev_span->second.str, 0, MBString::Size(prev_span->second.str) - dists.first);
         }
     }
 
@@ -299,10 +301,10 @@ namespace ttui
                 auto pos = itr->first + x_offset - y_offset * width;
                 const auto& span = itr->second;
 
-                if (span.str.size() <= width && pos + span.str.size() > width)
+                if (MBString::Size(span.str) <= width && pos + MBString::Size(span.str) > width)
                 {
                     auto add_y = 1;
-                    while (pos + (int32_t)span.str.size() > width * (add_y + 1))
+                    while (pos + (int32_t)MBString::Size(span.str) > width * (add_y + 1))
                         ++add_y;
 
                     y_offset += add_y;
@@ -315,9 +317,9 @@ namespace ttui
 
                     pos = itr->first + x_offset - y_offset * width;
                 }
-                else if (span.str.size() > width)
+                else if (MBString::Size(span.str) > width)
                 {
-                    x_offset -= pos + span.str.size() - width;
+                    x_offset -= pos + MBString::Size(span.str) - width;
                 }
                 
                 wrapped_map.at(line.first + line_offset + y_offset).emplace(pos, span);

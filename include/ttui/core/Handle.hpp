@@ -21,6 +21,13 @@ namespace ttui
         std::string buf;
 
         /**
+         * @brief Initialize tcon in this Handle.
+         * 
+         * @return bool Boolean indicating success or not
+         */
+        bool Init();
+
+        /**
          * @brief Render a widget given its bounding rectangle.
          * 
          * @param widget The widget, has to be of derived from Widget

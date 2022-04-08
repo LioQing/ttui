@@ -57,7 +57,7 @@ int main()
 
         ttui::Paragraph paragraph;
 
-        paragraph.AddSpan(0, 0, ttui::Span("ab\ncd"));
+        paragraph.AddSpan(0, 0, ttui::Span("ab\n\u204b\u204b"));
         paragraph.AddSpan(2, 0, ttui::Span("def\nghi"));
         paragraph.AddSpan(4, 0, ttui::Span("Init\n2nd", ttui::Appearance(ttui::Color::BrightYellow())));
 

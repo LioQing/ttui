@@ -2,10 +2,13 @@
 
 #include <cstdint>
 #include <algorithm>
+#include <clocale>
+#include <stdexcept>
 
 #include <ttui/core/Widget.hpp>
 #include <ttui/core/Appearance.hpp>
 #include <ttui/core/Span.hpp>
+#include <ttui/core/MBString.hpp>
 
 namespace
 {
@@ -75,6 +78,12 @@ namespace
 
 namespace ttui
 {
+    bool Handle::Init()
+    {
+        std::setlocale(LC_ALL, "en_US.UTF-8");
+        return tcon::Handle::Init();
+    }
+
     void Handle::Render(const Widget& widget, const Rect& rect)
     {
         if (widget.Enabled())
@@ -176,11 +185,11 @@ namespace ttui
                 {
                     buf += ProcessAppearance(border.slices.at(mid_slice).appear);
                     for (const auto& i : ProjectInterval(rect.x + 1, rect.Right() - 1, drawn_intervals))
-                    {
+                    { 
                         buf += tcon::SetCursorPos(i.first, rect.y + y);
                         for (uint16_t j = 0; j < (int32_t)i.second - i.first; ++j)
                         {
-                            if (mid_slice == Border::Top && i.first + j >= rect.x + 1 && i.first + j < rect.x + border.title.size() + 1)
+                            if (mid_slice == Border::Top && i.first + j >= rect.x + 1 && i.first + j < rect.x + MBString::Size(border.title) + 1)
                             {
                                 buf += border.title.at(j);
                             }
@@ -216,8 +225,8 @@ namespace ttui
             {
                 Span span = widget.GetSpan(y - offset, x, Rect(rect.x + offset, rect.y + offset, widget_width, rect.height - offset * 2));
 
-                if (x + span.str.size() > widget_width)
-                    span.str = span.str.substr(0, widget_width - x);
+                if (x + MBString::Size(span.str) > widget_width)
+                    span.str = MBString::Substr(span.str, 0, widget_width - x);
 
                 auto next_x = IsInIntervals(x + offset, drawn_intervals);
                 if (next_x > -1)
@@ -237,14 +246,14 @@ namespace ttui
                 else
                 {
                     buf += ProcessAppearance(span.appear);
-                    for (const auto& i : ProjectInterval(rect.x + x + offset, rect.x + x + offset + span.str.size(), drawn_intervals))
+                    for (const auto& i : ProjectInterval(rect.x + x + offset, rect.x + x + offset + MBString::Size(span.str), drawn_intervals))
                     {
                         buf +=
                             tcon::SetCursorPos(i.first, rect.y + y) +
-                            span.str.substr(i.first - x - offset - rect.x, i.second - i.first);
+                            MBString::Substr(span.str, i.first - x - offset - rect.x, i.second - i.first);
                     }
                     is_last_empty = false;
-                    x += span.str.size();
+                    x += MBString::Size(span.str);
                 }
             }
 
