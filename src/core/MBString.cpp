@@ -24,7 +24,7 @@ namespace ttui { namespace MBString
 
     std::string Substr(const std::string& s, size_t pos, size_t n)
     {
-        const char* ptr = s.data() + pos;
+        const char* ptr = s.data();
         const char* end = ptr + s.size();
         size_t curr_pos = 0;
         size_t start_pos = 0;
