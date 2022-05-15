@@ -161,7 +161,7 @@ int main()
 
                         if (!span.str.empty())
                         {
-                            span.str.pop_back();
+                            span.str = ttui::MBString::Substr(span.str, 0, ttui::MBString::Size(span.str) - 1);
                             my_text_para.SetSpan(typing_cursor, 0, span);
                         }
                         else if (typing_cursor > 1)

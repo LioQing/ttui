@@ -19,6 +19,7 @@
 #include <ttui/core/cursor.hpp>
 #include <ttui/core/screen.hpp>
 #include <ttui/core/mouse.hpp>
+#include <ttui/core/MBString.hpp>
 
 namespace ttui
 {
